@@ -58,22 +58,44 @@ if (process.env.APP_URL) {
   process.env.APP_URL.split(',').forEach(addOrigin);
 }
 
+
 function isOriginAllowed(origin) {
   if (!origin) return true;
   if (allowedOrigins.has(origin)) return true;
+
   try {
     const { hostname, protocol } = new URL(origin);
-    if ((protocol === 'http:' || protocol === 'https:') && (hostname === 'localhost' || hostname === '127.0.0.1')) {
+
+    if (
+      (protocol === 'http:' || protocol === 'https:') &&
+      (hostname === 'localhost' || hostname === '127.0.0.1')
+    ) {
       return true;
     }
-    if (protocol === 'https:' && hostname.endsWith('.onrender.com') && hostname.includes('adse')) {
+
+    if (
+      protocol === 'https:' &&
+      hostname.endsWith('.onrender.com') &&
+      hostname.includes('adse')
+    ) {
+      return true;
+    }
+
+    // Allow Vercel deployments belonging to this project/team only.
+    if (
+      protocol === 'https:' &&
+      hostname.endsWith('-hasyareddyg-3586s-projects.vercel.app') &&
+      hostname.startsWith('adse-website-')
+    ) {
       return true;
     }
   } catch {
-    // invalid URL format
+    // Invalid URL format
   }
+
   return false;
 }
+
 
 const corsOptions = {
   origin: (origin, callback) => {
