@@ -26,13 +26,17 @@ if (!process.env.JWT_SECRET) {
 const app = express();
 app.disable('x-powered-by');
 
+
 const allowedOrigins = new Set([
   'https://adse-website.onrender.com',
+  'https://adse-website-clbp3ztq8-hasyareddyg-3586s-projects.vercel.app',
+  'https://adse-website-git-5btcsds-reac-9fcfea-hasyareddyg-3586s-projects.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:3000',
 ]);
+
 
 function addOrigin(url) {
   if (!url) return;
