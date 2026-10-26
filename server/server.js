@@ -28,6 +28,7 @@ app.disable('x-powered-by');
 
 
 const allowedOrigins = new Set([
+  'https://adse-website.vercel.app',
   'https://adse-website.onrender.com',
   'https://adse-website-clbp3ztq8-hasyareddyg-3586s-projects.vercel.app',
   'https://adse-website-git-5btcsds-reac-9fcfea-hasyareddyg-3586s-projects.vercel.app',
