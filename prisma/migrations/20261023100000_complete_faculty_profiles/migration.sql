@@ -1,0 +1,10 @@
+ALTER TABLE "FacultyProfile"
+    ADD COLUMN IF NOT EXISTS "designation" TEXT,
+    ADD COLUMN IF NOT EXISTS "qualification" TEXT,
+    ADD COLUMN IF NOT EXISTS "bio" TEXT,
+    ADD COLUMN IF NOT EXISTS "publicEmail" TEXT,
+    ADD COLUMN IF NOT EXISTS "researchGate" TEXT,
+    ADD COLUMN IF NOT EXISTS "googleScholar" TEXT,
+    ADD COLUMN IF NOT EXISTS "orcid" TEXT,
+    ADD COLUMN IF NOT EXISTS "website" TEXT,
+    ADD COLUMN IF NOT EXISTS "cabinLocation" TEXT;

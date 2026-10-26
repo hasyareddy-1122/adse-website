@@ -12,14 +12,14 @@ datasource db {
 
 // Roles: SUPER_ADMIN | ADMIN (HOD) | FACULTY | STUDENT
 model User {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
   passwordHash String?
   name         String
-  role         String    @default("STUDENT")
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  role         String   @default("STUDENT")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   facultyProfile FacultyProfile?
   taughtSubjects Subject[]       @relation("SubjectTeacher")
@@ -33,22 +33,23 @@ model User {
 // Email-based invitations used by ADMIN/SUPER_ADMIN to onboard
 // faculties (and admins) — the invite is bound to an email address.
 model Invitation {
-  id              Int       @id @default(autoincrement())
-  email           String
-  name            String
-  role            String // FACULTY | ADMIN
-  token           String    @unique
-  expiresAt       DateTime
-  acceptedAt      DateTime?
-  createdById     Int
-  createdBy       User      @relation(fields: [createdById], references: [id])
-  createdAt       DateTime  @default(now())
+  id          Int       @id @default(autoincrement())
+  email       String
+  name        String
+  role        String // FACULTY | ADMIN
+  token       String    @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdById Int
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
 
   @@index([email])
 }
 
 // Public-facing faculty directory entries (seeded from faculty.json).
 // Optionally linked to a User account with role FACULTY.
+
 model FacultyProfile {
   id             Int     @id @default(autoincrement())
   name           String
@@ -57,7 +58,18 @@ model FacultyProfile {
   image          String?
   userId         Int?    @unique
   user           User?   @relation(fields: [userId], references: [id])
+
+  designation    String?
+  qualification  String?
+  bio            String?
+  publicEmail    String?
+  researchGate   String?
+  googleScholar  String?
+  orcid          String?
+  website        String?
+  cabinLocation  String?
 }
+
 
 model ClassSection {
   id        Int       @id @default(autoincrement())
@@ -67,31 +79,31 @@ model ClassSection {
 }
 
 model Subject {
-  id             Int           @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   title          String
-  code           String        @unique
+  code           String       @unique
   classSectionId Int
-  classSection   ClassSection  @relation(fields: [classSectionId], references: [id], onDelete: Cascade)
+  classSection   ClassSection @relation(fields: [classSectionId], references: [id], onDelete: Cascade)
   teacherId      Int?
-  teacher        User?         @relation("SubjectTeacher", fields: [teacherId], references: [id])
+  teacher        User?        @relation("SubjectTeacher", fields: [teacherId], references: [id])
   documents      Document[]
 
   @@index([teacherId])
 }
 
 model Document {
-  id          Int      @id @default(autoincrement())
-  title       String
-  fileName    String // original name
-  storedName  String   @unique // name on disk inside uploads/
-  mimeType    String
-  sizeBytes   Int
-  isPublic    Boolean  @default(true)
-  subjectId   Int
-  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  id           Int      @id @default(autoincrement())
+  title        String
+  fileName     String // original name
+  storedName   String   @unique // name on disk inside uploads/
+  mimeType     String
+  sizeBytes    Int
+  isPublic     Boolean  @default(true)
+  subjectId    Int
+  subject      Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   uploadedById Int
-  uploadedBy  User     @relation(fields: [uploadedById], references: [id])
-  createdAt   DateTime @default(now())
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
 
   @@index([subjectId])
 }

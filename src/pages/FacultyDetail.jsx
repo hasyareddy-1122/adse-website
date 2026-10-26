@@ -1,44 +1,70 @@
-import { useState, useEffect } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-import { getApiUrl } from '../lib/api'
-import './FacultyDetail.css'
+import { useState, useEffect } from "react";
+import { useSearchParams, Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { getApiUrl } from "../lib/api";
+import "./FacultyDetail.css";
 
 export default function FacultyDetail() {
-  const [searchParams] = useSearchParams()
-  const id = parseInt(searchParams.get('id'))
-  const [faculty, setFaculty] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [searchParams] = useSearchParams();
+  const rawId = searchParams.get("id");
+  const id = rawId ? Number(rawId) : NaN;
+
+  const [faculty, setFaculty] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // API (database) first, bundled JSON as offline fallback
-    async function load() {
+    let cancelled = false;
+
+    async function loadFaculty() {
+      setLoading(true);
+      setError("");
+      setFaculty(null);
+
+      if (!Number.isInteger(id) || id < 1) {
+        setError("Invalid faculty ID.");
+        setLoading(false);
+        return;
+      }
+
       try {
-        let data = null
-        try {
-          const res = await fetch(getApiUrl('/api/faculties'), { cache: 'no-store' })
-          if (res.ok) {
-            const payload = await res.json()
-            if (Array.isArray(payload?.faculties) && payload.faculties.length) data = payload.faculties
-          }
-        } catch { /* fall through */ }
-        if (!data) {
-          const res = await fetch('/faculty.json')
-          data = await res.json()
+        const response = await fetch(getApiUrl(`/api/faculties/${id}`), {
+          cache: "no-store",
+        });
+
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload?.error || "Unable to load faculty details.");
         }
-        if (Array.isArray(data)) {
-          const found = data.find(f => f.id === id)
-          setFaculty(found || null)
+
+        if (!cancelled) {
+          setFaculty(payload?.faculty || null);
+          if (!payload?.faculty) setError("Faculty not found.");
         }
       } catch (err) {
-        console.error('Error loading faculty data:', err)
+        if (!cancelled) {
+          setError(err.message || "Unable to load faculty details.");
+        }
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false);
       }
     }
-    load()
-  }, [id])
+
+    loadFaculty();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  const academicLinks = [
+    { label: "ResearchGate", url: faculty?.researchGate },
+    { label: "Google Scholar", url: faculty?.googleScholar },
+    { label: "ORCID", url: faculty?.orcid },
+    { label: "Website", url: faculty?.website },
+  ].filter((item) => typeof item.url === "string" && item.url.trim());
 
   return (
     <div className="fd-page">
@@ -53,39 +79,118 @@ export default function FacultyDetail() {
           <div className="fd-faculty-details">
             <p>Loading faculty details…</p>
           </div>
-        ) : !faculty ? (
+        ) : error ? (
           <div className="fd-faculty-details">
-            <p>Faculty not found.</p>
+            <p>{error}</p>
+          </div>
+        ) : faculty ? (
+          <div className="fd-faculty-details">
+            <div className="fd-faculty-left">
+              {faculty.image && (
+                <img
+                  src={
+                    faculty.image.startsWith("http")
+                      ? faculty.image
+                      : `/${faculty.image.replace(/^\/+/, "")}`
+                  }
+                  alt={faculty.name || "Faculty"}
+                />
+              )}
+
+              <h2>{faculty.name}</h2>
+
+              {faculty.designation && <p>{faculty.designation}</p>}
+
+              {faculty.department && (
+                <p>
+                  <strong>Department:</strong> {faculty.department}
+                </p>
+              )}
+
+              {faculty.specialization && (
+                <p>
+                  <strong>Specialization:</strong> {faculty.specialization}
+                </p>
+              )}
+            </div>
+
+            <div className="fd-faculty-right">
+              <h2>{faculty.name}</h2>
+
+              {faculty.designation && (
+                <p>
+                  <strong>Designation:</strong> {faculty.designation}
+                </p>
+              )}
+
+              {faculty.specialization && (
+                <p>
+                  <strong>Specialization:</strong> {faculty.specialization}
+                </p>
+              )}
+
+              {faculty.department && (
+                <p>
+                  <strong>Department:</strong> {faculty.department}
+                </p>
+              )}
+
+              {faculty.cabinLocation && (
+                <p>
+                  <strong>Cabin Location:</strong> {faculty.cabinLocation}
+                </p>
+              )}
+
+              {faculty.qualification && (
+                <p>
+                  <strong>Qualification:</strong> {faculty.qualification}
+                </p>
+              )}
+
+              {faculty.bio && (
+                <p>
+                  <strong>About:</strong> {faculty.bio}
+                </p>
+              )}
+
+              {faculty.publicEmail && (
+                <p>
+                  <strong>Email:</strong>{" "}
+                  <a href={`mailto:${faculty.publicEmail}`}>
+                    {faculty.publicEmail}
+                  </a>
+                </p>
+              )}
+
+              {academicLinks.length > 0 && (
+                <div className="fd-btns">
+                  {academicLinks.map((item) => (
+                    <a
+                      key={item.label}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer">
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="fd-faculty-details">
-            <div className="fd-faculty-left">
-              <img src={`/${faculty.image}`} alt={faculty.name} />
-              <h2>{faculty.name}</h2>
-              <p><strong>Department:</strong> {faculty.department}</p>
-              <p><strong>Specialization:</strong> {faculty.specialization}</p>
-            </div>
-            <div className="fd-faculty-right">
-              <h2>{faculty.name}</h2>
-              <p><strong>Specialization:</strong> {faculty.specialization}</p>
-              <p><strong>Department:</strong> {faculty.department}</p>
-              <p><strong>Campus:</strong> Bangalore Kengeri Campus</p>
-              <p><strong>Qualification:</strong> ME, PhD</p>
-              <div className="fd-btns">
-                <a href="https://www.researchgate.net" target="_blank" rel="noopener noreferrer">Research Gate</a>
-                <a href="https://scholar.google.com" target="_blank" rel="noopener noreferrer">Google Scholar</a>
-                <a href="https://orcid.org" target="_blank" rel="noopener noreferrer">ORCID</a>
-              </div>
-            </div>
+            <p>Faculty not found.</p>
           </div>
         )}
 
-        <div style={{ textAlign: 'center' }}>
-          <Link className="fd-back-btn" to="/#faculty">← Back to Faculty List</Link>
+        <div style={{ textAlign: "center" }}>
+          <Link className="fd-back-btn" to="/#faculty">
+            ← Back to Faculty List
+          </Link>
         </div>
       </div>
 
       <Footer />
     </div>
-  )
+  );
 }
