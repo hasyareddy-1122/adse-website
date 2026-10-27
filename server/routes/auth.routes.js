@@ -107,6 +107,19 @@ router.post('/invitations/:token/accept', async (req, res, next) => {
 
     res.status(201).json({ message: 'Account created. You can now log in.', user: publicUser(result) });
   } catch (err) {
+    if (err?.code === 'P2002') {
+      console.error('[INVITATION ACCEPT] Unique constraint violation:', {
+        model: err.meta?.modelName,
+        target: err.meta?.target,
+      });
+    } else {
+      console.error('[INVITATION ACCEPT] Failed:', {
+        code: err?.code,
+        name: err?.name,
+        message: err?.message,
+      });
+    }
+
     next(err);
   }
 });

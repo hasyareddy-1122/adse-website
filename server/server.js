@@ -172,9 +172,16 @@ app.use((err, _req, res, _next) => {
       err.code === 'LIMIT_FILE_SIZE' ? 'File exceeds the 25 MB limit' : `Upload error: ${err.message}`;
     return res.status(400).json({ error: msg });
   }
-  if (err && err.code === 'P2002') {
-    return res.status(409).json({ error: 'A record with this unique value already exists' });
-  }
+if (err && err.code === 'P2002') {
+  console.error('Prisma unique constraint error:', {
+    model: err.meta?.modelName,
+    target: err.meta?.target,
+  });
+
+  return res.status(409).json({
+    error: 'A record with this unique value already exists',
+  });
+}
   console.error(err);
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });

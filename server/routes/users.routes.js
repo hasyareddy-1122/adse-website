@@ -68,8 +68,12 @@ router.post('/invite', async (req, res, next) => {
       frontendBase = `https://${frontendBase}`;
     }
     const inviteUrl = `${frontendBase}/accept-invite?token=${token}`;
-    sendInviteEmail({ to: normalized, name, role: inviteRole }).catch(console.error);
-
+    sendInviteEmail({
+      to: normalized,
+      name: String(name).trim(),
+      role: inviteRole,
+      inviteUrl,
+    }).catch(console.error);
     res.status(201).json({
       invitation: { id: invite.id, email: invite.email, name: invite.name, role: invite.role, expiresAt },
       inviteUrl, // delivered by email in production; surfaced here for dev
