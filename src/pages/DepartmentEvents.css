@@ -1,0 +1,108 @@
+.department-events-page {
+    min-height: 100vh;
+    background: #fff;
+    color: #171717;
+    padding: 60px 8%;
+}
+
+.department-events-page h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #111;
+}
+
+.department-events-page>p {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 35px;
+}
+
+.department-events-page .events-list {
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.department-events-page .event {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 22px;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.department-events-page .event:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.department-events-page .event-date {
+    flex-shrink: 0;
+    width: 85px;
+    min-height: 85px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #111;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.department-events-page .event-date span {
+    color: #ccc;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.department-events-page .event-details {
+    flex: 1;
+}
+
+.department-events-page .event-details h3 {
+    color: #171717;
+    font-size: 19px;
+    margin: 0 0 8px;
+}
+
+.department-events-page .event-details p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 5px 0;
+}
+
+@media (max-width: 600px) {
+    .department-events-page {
+        padding: 35px 5%;
+    }
+
+    .department-events-page h1 {
+        font-size: 28px;
+    }
+
+    .department-events-page .event {
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .department-events-page .event-date {
+        width: 68px;
+        min-height: 75px;
+        font-size: 14px;
+    }
+
+    .department-events-page .event-details h3 {
+        font-size: 16px;
+    }
+}
