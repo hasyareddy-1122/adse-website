@@ -116,9 +116,10 @@ export default function AboutUs() {
 
       const scrollProgress = Math.min(Math.max(-rect.top / maxScroll, 0), 1);
 
-      setLineHeight(scrollDistance);
       const firstItemTop = itemsRef.current[0]?.offsetTop || 0;
       const scrollDistance = scrollProgress * timelineEl.scrollHeight;
+
+      setLineHeight(scrollDistance);
 
       let step = 0;
 
