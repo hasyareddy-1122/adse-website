@@ -323,33 +323,111 @@
 #programs {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
+  align-items: center;
   padding: 60px var(--pad-x-mobile);
-  background-image: image-set(url("/assets/denery-banner1.avif") type("image/avif"), url("/assets/denery-banner1.jpg") type("image/jpeg"));
+  background-image: image-set(url("/assets/denery-banner1.avif") type("image/avif"),
+      url("/assets/denery-banner1.jpg") type("image/jpeg"));
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
   z-index: 1;
 }
+
 #programs::before {
   content: "";
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.76);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.76);
   z-index: -1;
 }
-#programs .card { width: 260px; background: var(--bg-white); border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 6px 15px rgba(0,0,0,0.1); transition: transform var(--transition), box-shadow var(--transition); }
-#programs .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
-#programs .card-header { position: relative; height: 140px; background-size: cover; background-position: center; }
-#programs .profile-img { position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); width: 80px; height: 80px; border-radius: 50%; border: 4px solid var(--bg-white); background: var(--bg-white); object-fit: contain; padding: 10px; }
-#programs .card-body { padding: 50px 20px 20px; text-align: center; display: block; color: var(--text-body); }
-#programs .card-body h3 { font-family: var(--font-body); margin: 10px 0; font-size: 20px; font-weight: 600; color: #222; }
-#programs .card-body p { font-size: 14px; color: #666; line-height: 1.4; }
-#programs .card-body button { margin-top: 12px; padding: 8px 16px; border: 1px solid var(--bg-dark); background: transparent; color: var(--bg-dark); border-radius: var(--radius-xs); cursor: pointer; transition: all var(--transition); }
-#programs .card-body button:hover { background: var(--bg-dark); color: var(--bg-white); }
+
+#programs .programs-grid {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 20px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: var(--container);
+}
+
+#programs .card {
+  width: 260px;
+  max-width: 100%;
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+#programs .card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+#programs .card-header {
+  position: relative;
+  height: 140px;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+#programs .profile-img {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  max-width: 80px;
+  max-height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--bg-white);
+  background: var(--bg-white);
+  object-fit: contain;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#programs .card-body {
+  padding: 50px 20px 20px;
+  text-align: center;
+  display: block;
+  color: var(--text-body);
+}
+
+#programs .card-body h3 {
+  font-family: var(--font-body);
+  margin: 10px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+}
+
+#programs .card-body p {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+#programs .card-body button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: 1px solid var(--bg-dark);
+  background: transparent;
+  color: var(--bg-dark);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+#programs .card-body button:hover {
+  background: var(--bg-dark);
+  color: var(--bg-white);
+}
 
 /* Responsive */
 @media (max-width: 1024px) {
