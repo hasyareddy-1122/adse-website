@@ -1,6 +1,6 @@
 /* Role-adaptive dashboard.
 -  STUDENT     → own status tracking (read-only)
--  FACULTY     → own profile editor + upload/manage documents for subjects they teach
+-  FACULTY     → own profile editor
 -  ADMIN (HOD) → invite/remove faculties, manage users, directory,
 -                newsletter, service-learning & department activities
 -  SUPER_ADMIN → everything above + full event management + site content editor + admin invites */
@@ -11,7 +11,6 @@ import {
   getStoredUser,
   isLoggedIn,
   ROLE_LABELS,
-  fmtBytes,
   fmtDate,
   getApiUrl,
 } from "../lib/api.js";
@@ -274,261 +273,6 @@ function FacultyProfileEditor({ onErr, flashFn }) {
   );
 }
 
-/* ─── FACULTY ─────────────────────────────────────────────────────────────── */
-
-function FacultyWorkspace({ user, onErr, flashFn, deleteDocument }) {
-  const [docs, setDocs] = useState(null);
-  const [docsLoading, setDocsLoading] = useState(true);
-  const [docsError, setDocsError] = useState("");
-  const [mySubjects, setMySubjects] = useState([]);
-  const [subjectsLoading, setSubjectsLoading] = useState(true);
-  const [subjectsError, setSubjectsError] = useState("");
-  const [uploadError, setUploadError] = useState("");
-  const [uploading, setUploading] = useState(false);
-
-  const [title, setTitle] = useState("");
-  const [subjectId, setSubjectId] = useState("");
-  const [isPublic, setIsPublic] = useState(true);
-  const [file, setFile] = useState(null);
-
-  const refreshDocs = useCallback(async () => {
-    setDocsLoading(true);
-    setDocsError("");
-
-    try {
-      const d = await onErr(apiRequest("/api/documents?mine=1"));
-      setDocs(d.documents ?? []);
-    } catch (err) {
-      setDocsError(err?.message || "Failed to load your documents.");
-      throw err;
-    } finally {
-      setDocsLoading(false);
-    }
-  }, [onErr]);
-
-  const loadSubjects = useCallback(async () => {
-    setSubjectsLoading(true);
-    setSubjectsError("");
-    try {
-      const { classes } = await apiRequest("/api/classes");
-      const mine = classes.flatMap((c) =>
-        c.subjects
-          .filter((s) => s.teacher && s.teacher.id === user.id)
-          .map((s) => ({ ...s, className: c.name })),
-      );
-      setMySubjects(mine);
-      if (mine.length) {
-        setSubjectId((prev) =>
-          prev && mine.some((s) => String(s.id) === prev)
-            ? prev
-            : String(mine[0].id),
-        );
-      }
-    } catch (err) {
-      setSubjectsError(err?.message || "Failed to load subjects.");
-    } finally {
-      setSubjectsLoading(false);
-    }
-  }, [user.id]);
-
-  useEffect(() => {
-    loadSubjects();
-    refreshDocs().catch(() => {});
-  }, [loadSubjects, refreshDocs]);
-
-  async function handleUpload(e) {
-    e.preventDefault();
-    setUploadError("");
-    if (!mySubjects.length)
-      return flashFn("You have no assigned subjects.", false);
-
-    setUploading(true);
-    const fd = new FormData();
-    fd.append("title", title.trim());
-    fd.append("subjectId", subjectId);
-    fd.append("isPublic", String(isPublic));
-    fd.append("file", file);
-    try {
-      await onErr(
-        apiRequest("/api/documents", { method: "POST", formData: fd }),
-      );
-      flashFn("Document uploaded.");
-      setTitle("");
-      setFile(null);
-      e.target.reset();
-      await refreshDocs();
-    } catch (err) {
-      setUploadError(err.message);
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  return (
-    <div className="grid-2">
-      <section className="panel">
-        <h2>Upload a document</h2>
-        {uploadError && <div className="alert error">{uploadError}</div>}
-        {subjectsError ? (
-          <div>
-            <div className="alert error">{subjectsError}</div>
-            <button type="button" className="btn btn-sm" onClick={loadSubjects}>
-              Retry loading subjects
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleUpload} className="inline">
-            <div className="field">
-              <label htmlFor="upload-subject">Your subject</label>
-              <select
-                id="upload-subject"
-                value={subjectId}
-                onChange={(e) => setSubjectId(e.target.value)}
-                disabled={
-                  subjectsLoading || mySubjects.length === 0 || uploading
-                }
-                required>
-                {subjectsLoading ? (
-                  <option value="">Loading assigned subjects…</option>
-                ) : mySubjects.length === 0 ? (
-                  <option value="">No subjects assigned — ask your HOD</option>
-                ) : (
-                  mySubjects.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.code} — {s.title} ({s.className})
-                    </option>
-                  ))
-                )}
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="upload-title">Document title</label>
-              <input
-                id="upload-title"
-                type="text"
-                required
-                disabled={uploading}
-                placeholder="Unit-2 notes"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="upload-file">
-                File (PDF, docs, images… max 25 MB)
-              </label>
-              <input
-                id="upload-file"
-                type="file"
-                required
-                disabled={uploading}
-                accept="application/pdf,image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                alignItems: "center",
-                fontSize: ".85rem",
-                color: "#aaa",
-              }}>
-              <input
-                id="upload-public"
-                type="checkbox"
-                checked={isPublic}
-                disabled={uploading}
-                onChange={(e) => setIsPublic(e.target.checked)}
-              />
-              <label htmlFor="upload-public">Visible to public visitors</label>
-            </div>
-
-            <button
-              type="submit"
-              className="btn"
-              disabled={subjectsLoading || !mySubjects.length || uploading}>
-              {uploading ? "Uploading…" : "Upload"}
-            </button>
-          </form>
-        )}
-      </section>
-
-      <section className="panel">
-        <h2>My documents</h2>
-        {docsLoading ? (
-          <p className="empty">Loading documents…</p>
-        ) : docsError ? (
-          <div>
-            <div className="alert error" role="alert">
-              {docsError}
-            </div>
-            <button
-              type="button"
-              className="btn btn-sm"
-              onClick={() => refreshDocs().catch(() => {})}>
-              Retry loading documents
-            </button>
-          </div>
-        ) : !docs || docs.length === 0 ? (
-          <p className="empty">You have not uploaded any documents yet.</p>
-        ) : (
-          <table className="data">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Subject</th>
-                <th>Visibility</th>
-                <th>Size</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {docs.map((d) => (
-                <tr key={d.id}>
-                  <td>
-                    {d.title}
-                    <br />
-                    <span className="muted">{d.fileName}</span>
-                  </td>
-                  <td>
-                    <code style={{ fontSize: ".78rem", color: "#9ec5ee" }}>
-                      {d.subject.code}
-                    </code>{" "}
-                    {d.subject.className || ""}
-                  </td>
-                  <td>
-                    <span
-                      className={`pill ${d.isPublic ? "pill-public" : "pill-private"}`}>
-                      {d.isPublic ? "Public" : "Private"}
-                    </span>
-                  </td>
-                  <td className="muted">{fmtBytes(d.sizeBytes)}</td>
-                  <td className="actions">
-                    <a
-                      className="btn btn-ghost btn-sm"
-                      href={getApiUrl(d.downloadUrl)}
-                      target="_blank"
-                      rel="noopener">
-                      View
-                    </a>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => deleteDocument(d.id, refreshDocs)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-    </div>
-  );
-}
-
 /* ─── STAFF: Invitations ──────────────────────────────────────────────────── */
 
 function InvitationsPanel({ user, onErr, flashFn }) {
@@ -705,7 +449,7 @@ function InvitationsPanel({ user, onErr, flashFn }) {
 
 /* ─── STAFF: Users ────────────────────────────────────────────────────────── */
 
-function UsersPanel({ user, onErr, flashFn, onFacultyUsersChange }) {
+function UsersPanel({ user, onErr, flashFn }) {
   const [users, setUsers] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -716,15 +460,12 @@ function UsersPanel({ user, onErr, flashFn, onFacultyUsersChange }) {
     try {
       const d = await onErr(apiRequest("/api/users"));
       setUsers(d.users);
-      onFacultyUsersChange(
-        d.users.filter((u) => u.role === "FACULTY" && u.isActive),
-      );
     } catch (err) {
       setLoadError(err?.message || "Failed to load user accounts.");
     } finally {
       setLoading(false);
     }
-  }, [onErr, onFacultyUsersChange]);
+  }, [onErr]);
 
   useEffect(() => {
     refreshUsers();
@@ -1963,7 +1704,6 @@ export default function Dashboard() {
 
   const [ready, setReady] = useState(false);
   const [flashMsg, setFlashMsg] = useState(null); // { text, ok }
-  const [facultyUsers, setFacultyUsers] = useState([]);
   const timerRef = useRef(null);
 
   const userId = user?.id;
@@ -2003,24 +1743,6 @@ export default function Dashboard() {
     [flashFn],
   );
 
-  const handleFacultyUsersChange = useCallback((users) => {
-    setFacultyUsers(users);
-  }, []);
-
-  const deleteDocument = useCallback(
-    async (id, refresh) => {
-      if (!confirm("Delete this document?")) return;
-      try {
-        await onErr(apiRequest(`/api/documents/${id}`, { method: "DELETE" }));
-        flashFn("Document deleted.");
-        await refresh();
-      } catch {
-        /* handled */
-      }
-    },
-    [onErr, flashFn],
-  );
-
   if (!ready || !user) return null;
 
   const isStaff = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
@@ -2037,7 +1759,7 @@ export default function Dashboard() {
                 "Full control over site data, events, users and content.",
               ADMIN:
                 "Manage faculties via email invitations, directory, newsletter, service-learning and department activities.",
-              FACULTY: "Upload and manage documents for your subjects only.",
+              FACULTY: "Manage your public faculty profile.",
               STUDENT: "Track your application and project statuses.",
             }[user.role]
           }
@@ -2055,14 +1777,7 @@ export default function Dashboard() {
         {isStaff && (
           <InvitationsPanel user={user} onErr={onErr} flashFn={flashFn} />
         )}
-        {isStaff && (
-          <UsersPanel
-            user={user}
-            onErr={onErr}
-            flashFn={flashFn}
-            onFacultyUsersChange={handleFacultyUsersChange}
-          />
-        )}
+        {isStaff && <UsersPanel user={user} onErr={onErr} flashFn={flashFn} />}
         {isStaff && <DirectoryPanel onErr={onErr} flashFn={flashFn} />}
 
         {user.role === "SUPER_ADMIN" && (
