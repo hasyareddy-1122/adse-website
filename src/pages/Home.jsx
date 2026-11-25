@@ -20,7 +20,7 @@ export default function Home() {
   const [hodOpen, setHodOpen] = useState(false);
   const [programOpen, setProgramOpen] = useState(null);
 
-  // ── Faculty ──
+  // ── Faculty & Department Data ──
   const [facultyData, setFacultyData] = useState([]);
   const [departmentEvents, setDepartmentEvents] = useState([]);
   const [departmentActivities, setDepartmentActivities] = useState([]);
@@ -673,79 +673,108 @@ export default function Home() {
       </section>
 
       {/* Programs */}
-      <StaggerGrid id="programs" stagger={0.08}>
-        <StaggerItem className="card">
-          <div
-            className="card-header"
-            style={{ backgroundImage: "url('/assets/college5.avif')" }}>
-            <OptimizedImage
-              src="/assets/und-logo.webp"
-              alt="Logo"
-              className="profile-img"
-            />
-          </div>
-          <div className="card-body">
-            <h3>Undergraduate</h3>
-            <p>
-              Build a strong foundation with our undergraduate programs designed
-              for future leaders.
-            </p>
-            <button onClick={() => setProgramOpen("undergraduate")}>
-              More Info
-            </button>
-          </div>
-        </StaggerItem>
-        <StaggerItem className="card">
-          <div
-            className="card-header"
-            style={{ backgroundImage: "url('/assets/postgrad.avif')" }}>
-            <OptimizedImage
-              src="/assets/pg-logo.jpg"
-              alt="Logo"
-              className="profile-img"
-            />
-          </div>
-          <div className="card-body">
-            <h3>Postgraduate</h3>
-            <p>Advance your knowledge with specialized postgraduate degrees.</p>
-            <button onClick={() => setProgramOpen("postgraduate")}>
-              More Info
-            </button>
-          </div>
-        </StaggerItem>
-        <StaggerItem className="card">
-          <div
-            className="card-header"
-            style={{ backgroundImage: "url('/assets/phd.avif')" }}>
-            <OptimizedImage
-              src="/assets/images.png"
-              alt="Logo"
-              className="profile-img"
-            />
-          </div>
-          <div className="card-body">
-            <h3>PhD</h3>
-            <p>Pursue research and innovation with our doctoral programs.</p>
-            <button onClick={() => setProgramOpen("phd")}>More Info</button>
-          </div>
-        </StaggerItem>
-        <StaggerItem className="card">
-          <div
-            className="card-header"
-            style={{ backgroundImage: "url('/assets/onlinedeg.avif')" }}>
-            <OptimizedImage
-              src="/assets/ondeg-logo.jpg"
-              alt="Logo"
-              className="profile-img"
-            />
-          </div>
-          <div className="card-body">
-            <h3>Online Degree</h3>
-            <p>Learn anytime, anywhere with our flexible online programs.</p>
-            <button onClick={() => setProgramOpen("online")}>More Info</button>
-          </div>
-        </StaggerItem>
-      </StaggerGrid>
+      <section id="programs">
+        <StaggerGrid className="programs-grid" stagger={0.08}>
+          <StaggerItem className="card">
+            <div
+              className="card-header"
+              style={{
+                backgroundImage: "url('/assets/college5.avif')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}>
+              <OptimizedImage
+                src="/assets/und-logo.webp"
+                alt="Undergraduate Logo"
+                className="profile-img"
+              />
+            </div>
+            <div className="card-body">
+              <h3>Undergraduate</h3>
+              <p>
+                Build a strong foundation with our undergraduate programs
+                designed for future leaders.
+              </p>
+              <button onClick={() => setProgramOpen("undergraduate")}>
+                More Info
+              </button>
+            </div>
+          </StaggerItem>
+
+          <StaggerItem className="card">
+            <div
+              className="card-header"
+              style={{
+                backgroundImage: "url('/assets/postgrad.avif')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}>
+              <OptimizedImage
+                src="/assets/pg-logo.jpg"
+                alt="Postgraduate Logo"
+                className="profile-img"
+              />
+            </div>
+            <div className="card-body">
+              <h3>Postgraduate</h3>
+              <p>
+                Advance your knowledge with specialized postgraduate degrees.
+              </p>
+              <button onClick={() => setProgramOpen("postgraduate")}>
+                More Info
+              </button>
+            </div>
+          </StaggerItem>
+
+          <StaggerItem className="card">
+            <div
+              className="card-header"
+              style={{
+                backgroundImage: "url('/assets/phd.avif')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}>
+              <OptimizedImage
+                src="/assets/images.png"
+                alt="PhD Logo"
+                className="profile-img"
+              />
+            </div>
+            <div className="card-body">
+              <h3>PhD</h3>
+              <p>Pursue research and innovation with our doctoral programs.</p>
+              <button onClick={() => setProgramOpen("phd")}>More Info</button>
+            </div>
+          </StaggerItem>
+
+          <StaggerItem className="card">
+            <div
+              className="card-header"
+              style={{
+                backgroundImage: "url('/assets/onlinedeg.avif')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}>
+              <OptimizedImage
+                src="/assets/ondeg-logo.jpg"
+                alt="Online Degree Logo"
+                className="profile-img"
+              />
+            </div>
+            <div className="card-body">
+              <h3>Online Degree</h3>
+              <p>Learn anytime, anywhere with our flexible online programs.</p>
+              <button onClick={() => setProgramOpen("online")}>
+                More Info
+              </button>
+            </div>
+          </StaggerItem>
+        </StaggerGrid>
+      </section>
 
       {/* Programme Information Modals */}
       {programOpen && (
