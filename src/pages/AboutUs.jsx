@@ -1,7 +1,9 @@
 import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { ScrollReveal } from "../components/MotionPrimitives";
 import "./AboutUs.css";
 
 import kuriakoseImg from "../assets/kuriakose_chavara.png";
@@ -22,6 +24,9 @@ import treeImgAsset from "../assets/tree.png";
 import treeImgAssetAvif from "../assets/tree.avif";
 import deerImgAsset from "../assets/deer.png";
 import deerImgAssetAvif from "../assets/deer.avif";
+
+const HERO_EASE = [0.22, 1, 0.36, 1];
+
 const HISTORY_ITEMS = [
   {
     year: "1831",
@@ -112,7 +117,6 @@ export default function AboutUs() {
 
     if (!section || !timelineEl) return;
 
-    // Calculate section height from the actual timeline content
     const updateSectionHeight = () => {
       section.style.height = `${window.innerHeight + timelineEl.scrollHeight}px`;
     };
@@ -160,14 +164,11 @@ export default function AboutUs() {
     }
 
     updateSectionHeight();
-
-    // Run immediately so the first item is active at the beginning
     onScroll();
 
     window.addEventListener("scroll", onScroll);
     window.addEventListener("resize", updateSectionHeight);
 
-    // Recalculate when timeline content changes
     const resizeObserver = new ResizeObserver(() => {
       updateSectionHeight();
       onScroll();
@@ -182,7 +183,6 @@ export default function AboutUs() {
     };
   }, []);
 
-  // card in-view animation for vision/mission cards
   useEffect(() => {
     const cards = document.querySelectorAll(".about-anim-card");
     const io = new IntersectionObserver(
@@ -210,12 +210,14 @@ export default function AboutUs() {
           className="about-img top-left"
           src={kuriakoseImg}
           alt="St. Kuriakose"
-         avifSrc={kuriakoseImgAvif} />
+          avifSrc={kuriakoseImgAvif}
+        />
         <OptimizedImage
           className="about-img top-center"
           src={studentsStudyingImg}
           alt="Students reading"
-         avifSrc={studentsStudyingImgAvif} />
+          avifSrc={studentsStudyingImgAvif}
+        />
         <div className="vision-box-abs about-anim-card">
           <h2>VISION</h2>
           <p>
@@ -224,12 +226,19 @@ export default function AboutUs() {
             "EXCELLENCE AND SERVICE."
           </p>
         </div>
-        <h1 className="about-title">ABOUT US</h1>
+        <motion.h1
+          className="about-title"
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.65, ease: HERO_EASE }}>
+          ABOUT US
+        </motion.h1>
         <OptimizedImage
           className="about-img mid-right"
           src={deanSpeakingImg}
           alt="Speaker at podium"
-         avifSrc={deanSpeakingImgAvif} />
+          avifSrc={deanSpeakingImgAvif}
+        />
         <div className="mission-box-abs about-anim-card">
           <h2>MISSION</h2>
           <p>
@@ -242,12 +251,14 @@ export default function AboutUs() {
           className="about-img bottom-center"
           src={studentsGroupImg}
           alt="Students working"
-         avifSrc={studentsGroupImgAvif} />
+          avifSrc={studentsGroupImgAvif}
+        />
         <OptimizedImage
           className="about-img bottom-right"
           src={departmentImg}
           alt="Smiling students"
-         avifSrc={departmentImgAvif} />
+          avifSrc={departmentImgAvif}
+        />
       </section>
 
       {/* History */}
@@ -261,21 +272,23 @@ export default function AboutUs() {
               className={`default-img active${currentImgSrc.includes("cmi") ? " cmi" : ""}${currentImgSrc.includes("chclg") ? " chclg" : ""}`}
               alt="History step"
               ref={defaultImgRef}
-             />
+            />
 
             <OptimizedImage
               src={treeImgAsset}
               className={`special-img tree${showTree ? " show" : ""}`}
               alt="Tree"
               ref={treeImgRef}
-             avifSrc={treeImgAssetAvif} />
+              avifSrc={treeImgAssetAvif}
+            />
 
             <OptimizedImage
               src={deerImgAsset}
               className={`special-img deer${showDeer ? " show" : ""}`}
               alt="Deer"
               ref={deerImgRef}
-             avifSrc={deerImgAssetAvif} />
+              avifSrc={deerImgAssetAvif}
+            />
           </div>
 
           {/* History Timeline */}
@@ -304,7 +317,7 @@ export default function AboutUs() {
 
       {/* Department Section */}
       <section className="dept-section">
-        <div className="dept-content">
+        <ScrollReveal className="dept-content">
           <div className="dept-text">
             <h1>Our Department</h1>
             <p>
@@ -317,16 +330,24 @@ export default function AboutUs() {
             </p>
           </div>
           <div className="dept-img">
-            <OptimizedImage src={departmentImg} alt="Department Photo"  avifSrc={departmentImgAvif} />
+            <OptimizedImage
+              src={departmentImg}
+              alt="Department Photo"
+              avifSrc={departmentImgAvif}
+            />
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* Dean Section */}
       <section className="dean-section">
-        <div className="dean-container">
+        <ScrollReveal className="dean-container">
           <div className="dean-card">
-            <OptimizedImage src={deanSpeakingImg} alt="Dr. Raghunandan Kumar"  avifSrc={deanSpeakingImgAvif} />
+            <OptimizedImage
+              src={deanSpeakingImg}
+              alt="Dr. Raghunandan Kumar"
+              avifSrc={deanSpeakingImgAvif}
+            />
             <div className="dean-name">
               <h3>
                 DR. RAGHUNANDAN KUMAR
@@ -355,7 +376,7 @@ export default function AboutUs() {
               Read More
             </button>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* Dean Modal */}

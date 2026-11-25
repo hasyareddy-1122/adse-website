@@ -1,9 +1,17 @@
 import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { getApiUrl } from "../lib/api";
 import "./DepartmentEvents.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import {
+  ScrollReveal,
+  StaggerGrid,
+  StaggerItem,
+} from "../components/MotionPrimitives";
+
+const HERO_EASE = [0.22, 1, 0.36, 1];
 
 function resolveEventImageUrl(imageUrl) {
   if (!imageUrl) return null;
@@ -92,74 +100,76 @@ function DepartmentEvents() {
     const timeRange = formatEventTimeRange(event.startTime, event.endTime);
 
     return (
-      <article className="event" key={event.id ?? index}>
-        <div className="event-date">
-          {validDate
-            ? date.toLocaleDateString("en-US", {
-                month: "short",
-                day: "2-digit",
-              })
-            : "TBA"}
-          <br />
-          <span>{validDate ? date.getFullYear() : ""}</span>
-        </div>
-
-        <div className="event-details">
-          {resolvedImg && (
-            <OptimizedImage
-              src={resolvedImg}
-              alt={event.title}
-              style={{
-                width: "100%",
-                maxHeight: "260px",
-                objectFit: "cover",
-                borderRadius: "8px",
-                marginBottom: "12px",
-              }}
-             />
-          )}
-
-          <h3>
-            {event.title}{" "}
-            {event.isFeatured && (
-              <span
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  padding: "2px 8px",
-                  borderRadius: "999px",
-                  backgroundColor: "#111",
-                  color: "#fff",
-                  marginLeft: "8px",
-                  verticalAlign: "middle",
-                }}>
-                Featured
-              </span>
-            )}
-          </h3>
-          <p>{event.description}</p>
-          <p>
-            <strong>Date:</strong>{" "}
+      <StaggerItem key={event.id ?? index}>
+        <article className="event">
+          <div className="event-date">
             {validDate
               ? date.toLocaleDateString("en-US", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
                 })
-              : "To be announced"}
-          </p>
-          {timeRange && (
+              : "TBA"}
+            <br />
+            <span>{validDate ? date.getFullYear() : ""}</span>
+          </div>
+
+          <div className="event-details">
+            {resolvedImg && (
+              <OptimizedImage
+                src={resolvedImg}
+                alt={event.title}
+                style={{
+                  width: "100%",
+                  maxHeight: "260px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                  marginBottom: "12px",
+                }}
+              />
+            )}
+
+            <h3>
+              {event.title}{" "}
+              {event.isFeatured && (
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    padding: "2px 8px",
+                    borderRadius: "999px",
+                    backgroundColor: "#111",
+                    color: "#fff",
+                    marginLeft: "8px",
+                    verticalAlign: "middle",
+                  }}>
+                  Featured
+                </span>
+              )}
+            </h3>
+            <p>{event.description}</p>
             <p>
-              <strong>Time:</strong> {timeRange}
+              <strong>Date:</strong>{" "}
+              {validDate
+                ? date.toLocaleDateString("en-US", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
+                : "To be announced"}
             </p>
-          )}
-          {event.venue && (
-            <p>
-              <strong>Venue:</strong> {event.venue}
-            </p>
-          )}
-        </div>
-      </article>
+            {timeRange && (
+              <p>
+                <strong>Time:</strong> {timeRange}
+              </p>
+            )}
+            {event.venue && (
+              <p>
+                <strong>Venue:</strong> {event.venue}
+              </p>
+            )}
+          </div>
+        </article>
+      </StaggerItem>
     );
   };
 
@@ -168,8 +178,13 @@ function DepartmentEvents() {
       <Navbar />
 
       <main className="department-events-page">
-        <h1>Department Events</h1>
-        <p>Explore the events and activities organized by our department.</p>
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: HERO_EASE }}>
+          <h1>Department Events</h1>
+          <p>Explore the events and activities organized by our department.</p>
+        </motion.div>
 
         {loading ? (
           <p>Loading events...</p>
@@ -180,11 +195,13 @@ function DepartmentEvents() {
         ) : (
           <>
             <section style={{ marginTop: "24px" }}>
-              <h2>Upcoming Events</h2>
+              <ScrollReveal>
+                <h2>Upcoming Events</h2>
+              </ScrollReveal>
               {upcomingEvents.length > 0 ? (
-                <div className="events-list">
+                <StaggerGrid className="events-list" stagger={0.07}>
                   {upcomingEvents.map(renderEventCard)}
-                </div>
+                </StaggerGrid>
               ) : (
                 <p>No upcoming events scheduled at the moment.</p>
               )}
@@ -192,10 +209,12 @@ function DepartmentEvents() {
 
             {pastEvents.length > 0 && (
               <section style={{ marginTop: "40px" }}>
-                <h2>Past Events</h2>
-                <div className="events-list">
+                <ScrollReveal>
+                  <h2>Past Events</h2>
+                </ScrollReveal>
+                <StaggerGrid className="events-list" stagger={0.07}>
                   {pastEvents.map(renderEventCard)}
-                </div>
+                </StaggerGrid>
               </section>
             )}
           </>

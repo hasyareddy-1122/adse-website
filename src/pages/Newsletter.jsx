@@ -1,9 +1,17 @@
 import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { getApiUrl } from "../lib/api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import {
+  ScrollReveal,
+  StaggerGrid,
+  StaggerItem,
+} from "../components/MotionPrimitives";
 import "./Newsletter.css";
+
+const HERO_EASE = [0.22, 1, 0.36, 1];
 
 const CARDS = [
   {
@@ -191,7 +199,13 @@ export default function Newsletter() {
           Your browser does not support the video tag.
         </video>
         <div className="hero-overlay"></div>
-        <div className="hero-text-nl">Welcome Christite</div>
+        <motion.div
+          className="hero-text-nl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, ease: HERO_EASE }}>
+          Welcome Christite
+        </motion.div>
       </section>
 
       {/* Filter */}
@@ -210,7 +224,7 @@ export default function Newsletter() {
           ))}
         </div>
         <div className="search-box nl-search-box">
-          <OptimizedImage src={SEARCH_ICON} alt="Search icon"  />
+          <OptimizedImage src={SEARCH_ICON} alt="Search icon" />
           <input
             type="text"
             placeholder="Search newsletters…"
@@ -222,87 +236,95 @@ export default function Newsletter() {
       </section>
 
       <main className="nl-container">
-        <h1 className="page-title">EXPLORE NEWSLETTERS</h1>
+        <ScrollReveal>
+          <h1 className="page-title">EXPLORE NEWSLETTERS</h1>
+        </ScrollReveal>
 
         <section className="newsletter-wrapper">
-          <div className="newsletter-grid">
+          <StaggerGrid
+            key={`${activeFilter}-${query}`}
+            className="newsletter-grid"
+            stagger={0.05}>
             {filteredCards.map((card) => (
-              <article
-                className="newsletter-card"
-                key={card.id}
-                data-category={card.category}>
-                <OptimizedImage src={card.img} alt={card.alt}  />
-                <div className="card-body">
-                  <div className="card-meta">
-                    <span className="date">
-                      <OptimizedImage src={DATE_ICON} alt=""  />
-                      {card.date}
-                    </span>
-                    <span className="category">{card.category}</span>
-                  </div>
-                  <h3 className="card-title">{card.title}</h3>
-                  <h4 className="card-subtitle">{card.subtitle}</h4>
-                  <p className="card-desc">{card.desc}</p>
-                  <div className="card-footer">
-                    {card.readMore ? (
-                      <a
-                        href={card.readMore}
-                        className="nl-read-more"
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        Read More
-                      </a>
-                    ) : (
-                      <span className="nl-read-more" aria-disabled="true">
-                        Read More
+              <StaggerItem key={card.id}>
+                <article
+                  className="newsletter-card"
+                  data-category={card.category}>
+                  <OptimizedImage src={card.img} alt={card.alt} />
+                  <div className="card-body">
+                    <div className="card-meta">
+                      <span className="date">
+                        <OptimizedImage src={DATE_ICON} alt="" />
+                        {card.date}
                       </span>
-                    )}
+                      <span className="category">{card.category}</span>
+                    </div>
+                    <h3 className="card-title">{card.title}</h3>
+                    <h4 className="card-subtitle">{card.subtitle}</h4>
+                    <p className="card-desc">{card.desc}</p>
+                    <div className="card-footer">
+                      {card.readMore ? (
+                        <a
+                          href={card.readMore}
+                          className="nl-read-more"
+                          target="_blank"
+                          rel="noopener noreferrer">
+                          Read More
+                        </a>
+                      ) : (
+                        <span className="nl-read-more" aria-disabled="true">
+                          Read More
+                        </span>
+                      )}
 
-                    {card.downloadPdf ? (
-                      <a
-                        href={card.downloadPdf}
-                        className="pdf"
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        <OptimizedImage src={PDF_ICON} alt=""  />
-                        PDF
-                      </a>
-                    ) : (
-                      <span className="pdf" aria-disabled="true">
-                        <OptimizedImage src={PDF_ICON} alt=""  />
-                        PDF
-                      </span>
-                    )}
+                      {card.downloadPdf ? (
+                        <a
+                          href={card.downloadPdf}
+                          className="pdf"
+                          target="_blank"
+                          rel="noopener noreferrer">
+                          <OptimizedImage src={PDF_ICON} alt="" />
+                          PDF
+                        </a>
+                      ) : (
+                        <span className="pdf" aria-disabled="true">
+                          <OptimizedImage src={PDF_ICON} alt="" />
+                          PDF
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </article>
+                </article>
+              </StaggerItem>
             ))}
-          </div>
-          <aside className="newsletter-sidebar">
+          </StaggerGrid>
+          <StaggerGrid className="newsletter-sidebar" stagger={0.08}>
             {displaySidebar.map((card, index) => (
-              <article
-                className="newsletter-card"
-                key={card.id ?? `${card.title ?? "sidebar"}-${index}`}
-                data-category={card.category}>
-                <OptimizedImage src={card.img} alt={card.alt}  />
-                <div className="card-body">
-                  <div className="card-meta">
-                    <span className="date">
-                      <OptimizedImage src={DATE_ICON} alt=""  />
-                      {card.date}
-                    </span>
-                    <span className="category">{card.category}</span>
+              <StaggerItem
+                key={card.id ?? `${card.title ?? "sidebar"}-${index}`}>
+                <article
+                  className="newsletter-card"
+                  data-category={card.category}>
+                  <OptimizedImage src={card.img} alt={card.alt} />
+                  <div className="card-body">
+                    <div className="card-meta">
+                      <span className="date">
+                        <OptimizedImage src={DATE_ICON} alt="" />
+                        {card.date}
+                      </span>
+                      <span className="category">{card.category}</span>
+                    </div>
+                    <h3 className="card-title">{card.title}</h3>
+                    <p className="card-desc">{card.desc}</p>
                   </div>
-                  <h3 className="card-title">{card.title}</h3>
-                  <p className="card-desc">{card.desc}</p>
-                </div>
-              </article>
+                </article>
+              </StaggerItem>
             ))}
-          </aside>
+          </StaggerGrid>
         </section>
 
         {/* Featured */}
-        <section className="featured-section">
+        <ScrollReveal className="featured-section">
           <div className="featured-text">
             <h2>{featured.title || "Featured Newsletter"}</h2>
             {Array.isArray(featured.paragraphs) &&
@@ -315,10 +337,10 @@ export default function Newsletter() {
               <OptimizedImage
                 src={featured.img}
                 alt={featured.alt || featured.title || "Featured newsletter"}
-               />
+              />
             )}
           </div>
-        </section>
+        </ScrollReveal>
       </main>
 
       <Footer />

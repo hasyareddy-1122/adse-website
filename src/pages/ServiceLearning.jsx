@@ -1,7 +1,13 @@
 import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import {
+  ScrollReveal,
+  StaggerGrid,
+  StaggerItem,
+} from "../components/MotionPrimitives";
 import "./ServiceLearning.css";
 import { getApiUrl } from "../lib/api.js";
 
@@ -25,6 +31,9 @@ import serviceBanner1Img from "../assets/servicebanner1.jpg";
 import serviceBanner1ImgAvif from "../assets/servicebanner1.avif";
 import serviceBanner2Img from "../assets/servicebanner2.jpg";
 import serviceBanner2ImgAvif from "../assets/servicebanner2.avif";
+
+const HERO_EASE = [0.22, 1, 0.36, 1];
+
 const NEWSLETTERS = [
   {
     title: "Kusuri Mane",
@@ -139,9 +148,13 @@ export default function ServiceLearning() {
       <section className="sl-hero-section">
         <div className="sl-hero-inner">
           <div className="sl-hero-content">
-            <div className="sl-hero-text">
+            <motion.div
+              className="sl-hero-text"
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: HERO_EASE }}>
               <h1>DEPARTMENT OF AI ML &amp; DS</h1>
-            </div>
+            </motion.div>
           </div>
           <div className="sl-hero-spline-wrapper">
             <div className="sl-hero-spline">
@@ -161,7 +174,7 @@ export default function ServiceLearning() {
           <OptimizedImage
             src="https://cdn.builder.io/api/v1/image/assets/5e358c269d9140e1be810ef6482a3f72/2cef4ee11033eecb4a19ef2637573b4246bf4c9b"
             alt="Search icon"
-           />
+          />
           <input
             type="text"
             placeholder="Search projects…"
@@ -177,9 +190,11 @@ export default function ServiceLearning() {
 
       {/* About Section */}
       <section className="sl-section">
-        <h2>About Service Learning</h2>
+        <ScrollReveal>
+          <h2>About Service Learning</h2>
+        </ScrollReveal>
 
-        <div className="sl-row">
+        <ScrollReveal className="sl-row">
           <div className="sl-text">
             <p>
               Students apply classroom knowledge to solve practical problems in
@@ -188,11 +203,15 @@ export default function ServiceLearning() {
             </p>
           </div>
           <div className="sl-image">
-            <OptimizedImage src={serviceBannerImg} alt="Service Learning 1"  avifSrc={serviceBannerImgAvif} />
+            <OptimizedImage
+              src={serviceBannerImg}
+              alt="Service Learning 1"
+              avifSrc={serviceBannerImgAvif}
+            />
           </div>
-        </div>
+        </ScrollReveal>
 
-        <div className="sl-row reverse">
+        <ScrollReveal className="sl-row reverse" delay={0.05}>
           <div className="sl-text">
             <p>
               Working on service projects encourages teamwork, communication,
@@ -201,11 +220,15 @@ export default function ServiceLearning() {
             </p>
           </div>
           <div className="sl-image">
-            <OptimizedImage src={serviceBanner1Img} alt="Service Learning 2"  avifSrc={serviceBanner1ImgAvif} />
+            <OptimizedImage
+              src={serviceBanner1Img}
+              alt="Service Learning 2"
+              avifSrc={serviceBanner1ImgAvif}
+            />
           </div>
-        </div>
+        </ScrollReveal>
 
-        <div className="sl-row">
+        <ScrollReveal className="sl-row" delay={0.05}>
           <div className="sl-text">
             <p>
               Students gain awareness of societal challenges while developing
@@ -214,31 +237,45 @@ export default function ServiceLearning() {
             </p>
           </div>
           <div className="sl-image">
-            <OptimizedImage src={serviceBanner2Img} alt="Service Learning 3"  avifSrc={serviceBanner2ImgAvif} />
+            <OptimizedImage
+              src={serviceBanner2Img}
+              alt="Service Learning 3"
+              avifSrc={serviceBanner2ImgAvif}
+            />
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* Partners Section */}
       <main className="sl-container">
-        <h1 className="sl-page-title">Our Service Learning Partners</h1>
+        <ScrollReveal>
+          <h1 className="sl-page-title">Our Service Learning Partners</h1>
+        </ScrollReveal>
 
         <section className="sl-newsletter-wrapper">
-          <div className="sl-newsletter-grid">
-            {projectsLoading ? (
+          {projectsLoading ? (
+            <div className="sl-newsletter-grid">
               <p>Loading Service Learning projects...</p>
-            ) : (
-              <>
-                {paginatedList.map((project, idx) => (
-                  <article
-                    className="sl-newsletter-card"
-                    key={project.id ?? `${project.title ?? "project"}-${idx}`}>
+            </div>
+          ) : paginatedList.length === 0 ? (
+            <div className="sl-newsletter-grid">
+              <p>No Service Learning projects found.</p>
+            </div>
+          ) : (
+            <StaggerGrid
+              key={`${currentPage}-${searchQuery}`}
+              className="sl-newsletter-grid"
+              stagger={0.05}>
+              {paginatedList.map((project, idx) => (
+                <StaggerItem
+                  key={project.id ?? `${project.title ?? "project"}-${idx}`}>
+                  <article className="sl-newsletter-card">
                     {project.image && (
                       <div className="sl-card-image">
                         <OptimizedImage
                           src={project.image}
                           alt={project.title || "Service Learning project"}
-                         />
+                        />
                       </div>
                     )}
 
@@ -256,14 +293,10 @@ export default function ServiceLearning() {
                       </p>
                     </div>
                   </article>
-                ))}
-
-                {paginatedList.length === 0 && (
-                  <p>No Service Learning projects found.</p>
-                )}
-              </>
-            )}
-          </div>
+                </StaggerItem>
+              ))}
+            </StaggerGrid>
+          )}
         </section>
 
         {totalPages > 1 && (

@@ -1,10 +1,13 @@
 import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { getApiUrl } from "../lib/api";
 import "./FacultyDetail.css";
+
+const CARD_EASE = [0.22, 1, 0.36, 1];
 
 export default function FacultyDetail() {
   const [searchParams] = useSearchParams();
@@ -72,7 +75,12 @@ export default function FacultyDetail() {
       <Navbar />
 
       <section className="fd-hero-section">
-        <h1>Faculty Details</h1>
+        <motion.h1
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: CARD_EASE }}>
+          Faculty Details
+        </motion.h1>
       </section>
 
       <div className="fd-faculty-wrapper">
@@ -85,7 +93,11 @@ export default function FacultyDetail() {
             <p>{error}</p>
           </div>
         ) : faculty ? (
-          <div className="fd-faculty-details">
+          <motion.div
+            className="fd-faculty-details"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: CARD_EASE }}>
             <div className="fd-faculty-left">
               {faculty.image && (
                 <OptimizedImage
@@ -95,7 +107,7 @@ export default function FacultyDetail() {
                       : `/${faculty.image.replace(/^\/+/, "")}`
                   }
                   alt={faculty.name || "Faculty"}
-                 />
+                />
               )}
 
               <h2>{faculty.name}</h2>
@@ -177,7 +189,7 @@ export default function FacultyDetail() {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         ) : (
           <div className="fd-faculty-details">
             <p>Faculty not found.</p>
