@@ -4,7 +4,7 @@
 .caads-page { font-family: var(--font-body); color: var(--text-body); background: var(--bg-off-white); }
 
 /* Hero */
-.caads-hero { background: url('/assets/caads-banner.jpg') center/cover no-repeat; height: 65vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; color: var(--text-on-dark); }
+.caads-hero { background: image-set(url("/assets/caads-banner.avif") type("image/avif"), url("/assets/caads-banner.jpg") type("image/jpeg")) center/cover no-repeat; height: 65vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; color: var(--text-on-dark); }
 .caads-hero::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
 .caads-hero-content { position: relative; z-index: 1; max-width: 800px; padding: 0 var(--pad-x-mobile); }
 .caads-hero h1 { font-size: 60px; margin-bottom: 15px; letter-spacing: 2px; }

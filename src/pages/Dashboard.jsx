@@ -1,3 +1,4 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 /* Role-adaptive dashboard.
 -  STUDENT     → own status tracking (read-only)
 -  FACULTY     → own profile editor
@@ -731,7 +732,7 @@ function DirectoryPanel({ onErr, flashFn }) {
             <tr key={f.id}>
               <td>
                 {f.image && (
-                  <img className="thumb" src={getApiUrl(f.image)} alt="" />
+                  <OptimizedImage className="thumb" src={getApiUrl(f.image)} alt=""  />
                 )}
                 {f.name}
               </td>
@@ -1090,7 +1091,7 @@ function EventsManagementPanel({ onErr, flashFn }) {
 
         {form.imageUrl && (
           <div style={{ margin: "10px 0" }}>
-            <img
+            <OptimizedImage
               src={resolvePreviewUrl(form.imageUrl)}
               alt="Event banner preview"
               style={{
@@ -1100,7 +1101,7 @@ function EventsManagementPanel({ onErr, flashFn }) {
                 borderRadius: 6,
                 border: "1px solid #d4d4d4",
               }}
-            />
+             />
           </div>
         )}
 
@@ -1198,11 +1199,11 @@ function EventsManagementPanel({ onErr, flashFn }) {
                 <tr key={ev.id}>
                   <td>
                     {ev.imageUrl && (
-                      <img
+                      <OptimizedImage
                         className="thumb"
                         src={resolvePreviewUrl(ev.imageUrl)}
                         alt=""
-                      />
+                       />
                     )}
                     <strong>{ev.title}</strong>
                     <br />
@@ -1471,7 +1472,7 @@ function ContentEditor({ onErr, flashFn, userRole }) {
             </div>
 
             {card.img && (
-              <img
+              <OptimizedImage
                 src={card.img}
                 alt={card.alt || ""}
                 style={{
@@ -1481,7 +1482,7 @@ function ContentEditor({ onErr, flashFn, userRole }) {
                   objectFit: "contain",
                   marginTop: 8,
                 }}
-              />
+               />
             )}
           </fieldset>
         ))}

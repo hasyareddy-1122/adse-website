@@ -1,3 +1,4 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import './FacultyDev.css'
@@ -24,7 +25,7 @@ export default function FacultyDev() {
             <p>Faculty Development Activities (FDAs) at CHRIST (Deemed to be University), Department of Computer Science and Engineering, are designed to enhance teaching, research, and professional skills.</p>
           </div>
           <div className="about-row-img">
-            <img src="/assets/overviewcomputer.jpg" alt="Faculty Workshop" />
+            <OptimizedImage src="/assets/overviewcomputer.jpg" alt="Faculty Workshop"  />
           </div>
         </div>
 
@@ -33,7 +34,7 @@ export default function FacultyDev() {
             <p>These programs expose faculty members to the latest developments in Artificial Intelligence, Machine Learning, Cloud Computing, and other emerging areas.</p>
           </div>
           <div className="about-row-img">
-            <img src="/assets/abstract.jpg" alt="Faculty Training" />
+            <OptimizedImage src="/assets/abstract.jpg" alt="Faculty Training"  />
           </div>
         </div>
 
@@ -42,7 +43,7 @@ export default function FacultyDev() {
             <p>Through workshops, seminars, and training sessions, our faculty gain practical knowledge, connect with industry leaders, and evolve into more effective educators and researchers.</p>
           </div>
           <div className="about-row-img">
-            <img src="/assets/sinoer.webp" alt="Faculty Seminar" />
+            <OptimizedImage src="/assets/sinoer.webp" alt="Faculty Seminar"  />
           </div>
         </div>
 

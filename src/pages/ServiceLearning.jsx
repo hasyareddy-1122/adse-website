@@ -1,3 +1,4 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -5,16 +6,25 @@ import "./ServiceLearning.css";
 import { getApiUrl } from "../lib/api.js";
 
 import service1Img from "../assets/service1.jpg";
+import service1ImgAvif from "../assets/service1.avif";
 import service2Img from "../assets/service2.jpg";
+import service2ImgAvif from "../assets/service2.avif";
 import service3Img from "../assets/service3.jpg";
+import service3ImgAvif from "../assets/service3.avif";
 import service4Img from "../assets/service4.jpg";
+import service4ImgAvif from "../assets/service4.avif";
 import service5Img from "../assets/service5.png";
+import service5ImgAvif from "../assets/service5.avif";
 import service6Img from "../assets/service6.jpg";
+import service6ImgAvif from "../assets/service6.avif";
 import service7Img from "../assets/service7.jpg";
+import service7ImgAvif from "../assets/service7.avif";
 import serviceBannerImg from "../assets/servicebanner.jpg";
+import serviceBannerImgAvif from "../assets/servicebanner.avif";
 import serviceBanner1Img from "../assets/servicebanner1.jpg";
+import serviceBanner1ImgAvif from "../assets/servicebanner1.avif";
 import serviceBanner2Img from "../assets/servicebanner2.jpg";
-
+import serviceBanner2ImgAvif from "../assets/servicebanner2.avif";
 const NEWSLETTERS = [
   {
     title: "Kusuri Mane",
@@ -148,10 +158,10 @@ export default function ServiceLearning() {
       {/* Search Section */}
       <section className="sl-filter-section">
         <div className="search-box sl-search-box">
-          <img
+          <OptimizedImage
             src="https://cdn.builder.io/api/v1/image/assets/5e358c269d9140e1be810ef6482a3f72/2cef4ee11033eecb4a19ef2637573b4246bf4c9b"
             alt="Search icon"
-          />
+           />
           <input
             type="text"
             placeholder="Search projects…"
@@ -178,7 +188,7 @@ export default function ServiceLearning() {
             </p>
           </div>
           <div className="sl-image">
-            <img src={serviceBannerImg} alt="Service Learning 1" />
+            <OptimizedImage src={serviceBannerImg} alt="Service Learning 1"  avifSrc={serviceBannerImgAvif} />
           </div>
         </div>
 
@@ -191,7 +201,7 @@ export default function ServiceLearning() {
             </p>
           </div>
           <div className="sl-image">
-            <img src={serviceBanner1Img} alt="Service Learning 2" />
+            <OptimizedImage src={serviceBanner1Img} alt="Service Learning 2"  avifSrc={serviceBanner1ImgAvif} />
           </div>
         </div>
 
@@ -204,7 +214,7 @@ export default function ServiceLearning() {
             </p>
           </div>
           <div className="sl-image">
-            <img src={serviceBanner2Img} alt="Service Learning 3" />
+            <OptimizedImage src={serviceBanner2Img} alt="Service Learning 3"  avifSrc={serviceBanner2ImgAvif} />
           </div>
         </div>
       </section>
@@ -225,10 +235,10 @@ export default function ServiceLearning() {
                     key={project.id ?? `${project.title ?? "project"}-${idx}`}>
                     {project.image && (
                       <div className="sl-card-image">
-                        <img
+                        <OptimizedImage
                           src={project.image}
                           alt={project.title || "Service Learning project"}
-                        />
+                         />
                       </div>
                     )}
 

@@ -1,3 +1,4 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -281,7 +282,7 @@ export default function Home() {
               </article>
             </div>
           </div>
-          <img
+          <OptimizedImage
             src="/assets/sohini.jpg"
             alt="Students working on computers"
             className="mission-image"
@@ -350,7 +351,7 @@ export default function Home() {
         <div className="hod-section">
           <div className="hod-container">
             <div className="hod-image">
-              <img src="/assets/hod-image.webp" alt="HOD" />
+              <OptimizedImage src="/assets/hod-image.webp" alt="HOD" />
               <h3>Dr. Michael Moses T</h3>
               <p>
                 <a href="mailto:hod.aiml@christuniversity.in">
@@ -554,7 +555,7 @@ export default function Home() {
         <h1>Meet our Faculties</h1>
         <section className="faculty-search">
           <div className="search-container">
-            <img
+            <OptimizedImage
               src="https://cdn.builder.io/api/v1/image/assets/5e358c269d9140e1be810ef6482a3f72/2cef4ee11033eecb4a19ef2637573b4246bf4c9b?placeholderIfAbsent=true"
               alt="Search icon"
             />
@@ -575,7 +576,7 @@ export default function Home() {
           ) : (
             pageItems.map((f) => (
               <div className="faculty-card" key={f.id}>
-                <img src={`/${f.image}`} alt={f.name} loading="lazy" />
+                <OptimizedImage src={`/${f.image}`} alt={f.name} />
                 <h3>{f.name}</h3>
                 <h4>{f.department}</h4>
                 <p>Specialization: {f.specialization}</p>
@@ -617,10 +618,9 @@ export default function Home() {
           </div>
           <div className="features-cards">
             <article className="feature-card">
-              <img
+              <OptimizedImage
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/c2287c794fdf39706a06fbf3d717c89a937951d3?width=789"
                 alt="Curriculum Planning Interface"
-                loading="lazy"
               />
               <h3>Streamlined Curriculum Planning for Educators</h3>
               <p>
@@ -629,19 +629,17 @@ export default function Home() {
               </p>
             </article>
             <article className="feature-card">
-              <img
+              <OptimizedImage
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/abeb390e5bcb3ae9ea9bd19c90ff58ea9a03b748?width=789"
                 alt="Resource Management Dashboard"
-                loading="lazy"
               />
               <h3>Efficient Resource Management Made Simple</h3>
               <p>Optimize your resources to enhance learning outcomes.</p>
             </article>
             <article className="feature-card">
-              <img
+              <OptimizedImage
                 src="/assets/denery-banner1.jpg"
                 alt="Group Discussion"
-                loading="lazy"
               />
               <h3>Comprehensive Performance Evaluation Tools</h3>
               <p>Track and assess student performance effortlessly.</p>
@@ -655,12 +653,11 @@ export default function Home() {
         <div className="card">
           <div
             className="card-header"
-            style={{ backgroundImage: "url('/assets/college5.png')" }}>
-            <img
+            style={{ backgroundImage: "url('/assets/college5.avif')" }}>
+            <OptimizedImage
               src="/assets/und-logo.webp"
               alt="Logo"
               className="profile-img"
-              loading="lazy"
             />
           </div>
           <div className="card-body">
@@ -677,12 +674,11 @@ export default function Home() {
         <div className="card">
           <div
             className="card-header"
-            style={{ backgroundImage: "url('/assets/postgrad.jpg')" }}>
-            <img
+            style={{ backgroundImage: "url('/assets/postgrad.avif')" }}>
+            <OptimizedImage
               src="/assets/pg-logo.jpg"
               alt="Logo"
               className="profile-img"
-              loading="lazy"
             />
           </div>
           <div className="card-body">
@@ -696,12 +692,11 @@ export default function Home() {
         <div className="card">
           <div
             className="card-header"
-            style={{ backgroundImage: "url('/assets/phd.jpg')" }}>
-            <img
+            style={{ backgroundImage: "url('/assets/phd.avif')" }}>
+            <OptimizedImage
               src="/assets/images.png"
               alt="Logo"
               className="profile-img"
-              loading="lazy"
             />
           </div>
           <div className="card-body">
@@ -715,12 +710,11 @@ export default function Home() {
         <div className="card">
           <div
             className="card-header"
-            style={{ backgroundImage: "url('/assets/onlinedeg.jpg')" }}>
-            <img
+            style={{ backgroundImage: "url('/assets/onlinedeg.avif')" }}>
+            <OptimizedImage
               src="/assets/ondeg-logo.jpg"
               alt="Logo"
               className="profile-img"
-              loading="lazy"
             />
           </div>
           <div className="card-body">

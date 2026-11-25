@@ -1,3 +1,4 @@
+import OptimizedImage from ".//OptimizedImage.jsx";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { isLoggedIn, logout, getStoredUser } from "../lib/api.js";
@@ -25,11 +26,11 @@ export default function Navbar() {
     <header className="navbar">
       <div className="navbar-inner">
         <Link to="/">
-          <img
+          <OptimizedImage
             src="https://cdn.builder.io/api/v1/image/assets/TEMP/c6cfcd55332049a9408582f69ed157d9eecf76f0?width=304"
             alt="CHRIST University Logo"
             className="navbar-logo"
-          />
+           priority />
         </Link>
         <div className="navbar-center">
           <div className="navbar-links">

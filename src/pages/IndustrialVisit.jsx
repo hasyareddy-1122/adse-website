@@ -1,3 +1,4 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import './IndustrialVisit.css'
@@ -30,7 +31,7 @@ export default function IndustrialVisit() {
             </p>
           </div>
           <div className="iv-image">
-            <img src="/assets/industrial1.jpg" alt="Industrial Visit 1" />
+            <OptimizedImage src="/assets/industrial1.jpg" alt="Industrial Visit 1"  />
           </div>
         </div>
 
@@ -45,7 +46,7 @@ export default function IndustrialVisit() {
             </p>
           </div>
           <div className="iv-image">
-            <img src="/assets/industrial2.jpg" alt="Industrial Visit 2" />
+            <OptimizedImage src="/assets/industrial2.jpg" alt="Industrial Visit 2"  />
           </div>
         </div>
 
@@ -59,7 +60,7 @@ export default function IndustrialVisit() {
             </p>
           </div>
           <div className="iv-image">
-            <img src="/assets/industrial3.jpg" alt="Industrial Visit 3" />
+            <OptimizedImage src="/assets/industrial3.jpg" alt="Industrial Visit 3"  />
           </div>
         </div>
 
@@ -72,7 +73,7 @@ export default function IndustrialVisit() {
       <section className="industrial-visits">
         <h2>Our Industrial Visits</h2>
         <div className="visit-card">
-          <img src="/assets/Infosys_Mysore.jpg" alt="Infosys Mysore Visit" />
+          <OptimizedImage src="/assets/Infosys_Mysore.jpg" alt="Infosys Mysore Visit"  />
           <div className="visit-content">
             <h3>Industrial Visit to Infosys, Mysore</h3>
             <p>

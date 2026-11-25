@@ -1,18 +1,27 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import "./AboutUs.css";
 
 import kuriakoseImg from "../assets/kuriakose_chavara.png";
+import kuriakoseImgAvif from "../assets/kuriakose_chavara.avif";
 import cmiImg from "../assets/cmi.jpg";
+import cmiImgAvif from "../assets/cmi.avif";
 import chclgImg from "../assets/chclg.png";
+import chclgImgAvif from "../assets/chclg.avif";
 import studentsStudyingImg from "../assets/students_studying.png";
+import studentsStudyingImgAvif from "../assets/students_studying.avif";
 import deanSpeakingImg from "../assets/dean_speaking.png";
+import deanSpeakingImgAvif from "../assets/dean_speaking.avif";
 import studentsGroupImg from "../assets/students_group.png";
+import studentsGroupImgAvif from "../assets/students_group.avif";
 import departmentImg from "../assets/department.png";
+import departmentImgAvif from "../assets/department.avif";
 import treeImgAsset from "../assets/tree.png";
+import treeImgAssetAvif from "../assets/tree.avif";
 import deerImgAsset from "../assets/deer.png";
-
+import deerImgAssetAvif from "../assets/deer.avif";
 const HISTORY_ITEMS = [
   {
     year: "1831",
@@ -197,16 +206,16 @@ export default function AboutUs() {
 
       {/* About Hero */}
       <section className="about-section">
-        <img
+        <OptimizedImage
           className="about-img top-left"
           src={kuriakoseImg}
           alt="St. Kuriakose"
-        />
-        <img
+         avifSrc={kuriakoseImgAvif} />
+        <OptimizedImage
           className="about-img top-center"
           src={studentsStudyingImg}
           alt="Students reading"
-        />
+         avifSrc={studentsStudyingImgAvif} />
         <div className="vision-box-abs about-anim-card">
           <h2>VISION</h2>
           <p>
@@ -216,11 +225,11 @@ export default function AboutUs() {
           </p>
         </div>
         <h1 className="about-title">ABOUT US</h1>
-        <img
+        <OptimizedImage
           className="about-img mid-right"
           src={deanSpeakingImg}
           alt="Speaker at podium"
-        />
+         avifSrc={deanSpeakingImgAvif} />
         <div className="mission-box-abs about-anim-card">
           <h2>MISSION</h2>
           <p>
@@ -229,16 +238,16 @@ export default function AboutUs() {
             the society in a dynamic environment.
           </p>
         </div>
-        <img
+        <OptimizedImage
           className="about-img bottom-center"
           src={studentsGroupImg}
           alt="Students working"
-        />
-        <img
+         avifSrc={studentsGroupImgAvif} />
+        <OptimizedImage
           className="about-img bottom-right"
           src={departmentImg}
           alt="Smiling students"
-        />
+         avifSrc={departmentImgAvif} />
       </section>
 
       {/* History */}
@@ -247,26 +256,26 @@ export default function AboutUs() {
         <div className="history-content">
           {/* History Image */}
           <div className="history-image">
-            <img
+            <OptimizedImage
               src={currentImgSrc}
               className={`default-img active${currentImgSrc.includes("cmi") ? " cmi" : ""}${currentImgSrc.includes("chclg") ? " chclg" : ""}`}
               alt="History step"
               ref={defaultImgRef}
-            />
+             />
 
-            <img
+            <OptimizedImage
               src={treeImgAsset}
               className={`special-img tree${showTree ? " show" : ""}`}
               alt="Tree"
               ref={treeImgRef}
-            />
+             avifSrc={treeImgAssetAvif} />
 
-            <img
+            <OptimizedImage
               src={deerImgAsset}
               className={`special-img deer${showDeer ? " show" : ""}`}
               alt="Deer"
               ref={deerImgRef}
-            />
+             avifSrc={deerImgAssetAvif} />
           </div>
 
           {/* History Timeline */}
@@ -308,7 +317,7 @@ export default function AboutUs() {
             </p>
           </div>
           <div className="dept-img">
-            <img src={departmentImg} alt="Department Photo" />
+            <OptimizedImage src={departmentImg} alt="Department Photo"  avifSrc={departmentImgAvif} />
           </div>
         </div>
       </section>
@@ -317,7 +326,7 @@ export default function AboutUs() {
       <section className="dean-section">
         <div className="dean-container">
           <div className="dean-card">
-            <img src={deanSpeakingImg} alt="Dr. Raghunandan Kumar" />
+            <OptimizedImage src={deanSpeakingImg} alt="Dr. Raghunandan Kumar"  avifSrc={deanSpeakingImgAvif} />
             <div className="dean-name">
               <h3>
                 DR. RAGHUNANDAN KUMAR

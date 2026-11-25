@@ -1,3 +1,4 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useEffect, useState } from "react";
 import { getApiUrl } from "../lib/api";
 import "./DepartmentEvents.css";
@@ -105,10 +106,9 @@ function DepartmentEvents() {
 
         <div className="event-details">
           {resolvedImg && (
-            <img
+            <OptimizedImage
               src={resolvedImg}
               alt={event.title}
-              loading="lazy"
               style={{
                 width: "100%",
                 maxHeight: "260px",
@@ -116,7 +116,7 @@ function DepartmentEvents() {
                 borderRadius: "8px",
                 marginBottom: "12px",
               }}
-            />
+             />
           )}
 
           <h3>

@@ -1,3 +1,4 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 import Navbar from '../components/Navbar'
 import './ContactUs.css'
 
@@ -39,11 +40,11 @@ export default function ContactUs() {
       <Navbar />
 
       <main className="contact-wrapper">
-        <img
+        <OptimizedImage
           src="https://cdn.builder.io/api/v1/image/assets/5e358c269d9140e1be810ef6482a3f72/20755cad4db69315f1c2def14361a58d0f51c72a?placeholderIfAbsent=true"
           alt="Map Background"
           className="contact-bg"
-        />
+         />
         <section className="contact-card">
           <h1>Contact&nbsp;Us</h1>
           <form id="contactForm" onSubmit={handleContactSubmit}>
@@ -70,10 +71,10 @@ export default function ContactUs() {
         </section>
         <hr />
         <div className="footer-bottom-row">
-          <img
+          <OptimizedImage
             src="https://cdn.builder.io/api/v1/image/assets/5e358c269d9140e1be810ef6482a3f72/37d3f381ddc80a116ed948088198303064e25c38?placeholderIfAbsent=true"
             alt="Department logo"
-          />
+           />
           <p>© 2026 Christ Team</p>
         </div>
       </footer>

@@ -1,3 +1,4 @@
+import OptimizedImage from ".//OptimizedImage.jsx";
 export default function Footer() {
   return (
     <footer className="footer">
@@ -84,11 +85,11 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <div className="footer-bottom-left">
-            <img
+            <OptimizedImage
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/e76991aa421e489c54cbc0932fc11287b53692fc?width=304"
               alt="Department Logo"
               className="footer-logo"
-            />
+             />
           </div>
           <div className="footer-bottom-right">
             <p>© 2026 Christ Team</p>

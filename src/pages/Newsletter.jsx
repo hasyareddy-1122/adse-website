@@ -1,3 +1,4 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useEffect, useState } from "react";
 import { getApiUrl } from "../lib/api";
 import Navbar from "../components/Navbar";
@@ -209,7 +210,7 @@ export default function Newsletter() {
           ))}
         </div>
         <div className="search-box nl-search-box">
-          <img src={SEARCH_ICON} alt="Search icon" />
+          <OptimizedImage src={SEARCH_ICON} alt="Search icon"  />
           <input
             type="text"
             placeholder="Search newsletters…"
@@ -230,11 +231,11 @@ export default function Newsletter() {
                 className="newsletter-card"
                 key={card.id}
                 data-category={card.category}>
-                <img src={card.img} alt={card.alt} />
+                <OptimizedImage src={card.img} alt={card.alt}  />
                 <div className="card-body">
                   <div className="card-meta">
                     <span className="date">
-                      <img src={DATE_ICON} alt="" />
+                      <OptimizedImage src={DATE_ICON} alt=""  />
                       {card.date}
                     </span>
                     <span className="category">{card.category}</span>
@@ -263,12 +264,12 @@ export default function Newsletter() {
                         className="pdf"
                         target="_blank"
                         rel="noopener noreferrer">
-                        <img src={PDF_ICON} alt="" />
+                        <OptimizedImage src={PDF_ICON} alt=""  />
                         PDF
                       </a>
                     ) : (
                       <span className="pdf" aria-disabled="true">
-                        <img src={PDF_ICON} alt="" />
+                        <OptimizedImage src={PDF_ICON} alt=""  />
                         PDF
                       </span>
                     )}
@@ -283,11 +284,11 @@ export default function Newsletter() {
                 className="newsletter-card"
                 key={card.id ?? `${card.title ?? "sidebar"}-${index}`}
                 data-category={card.category}>
-                <img src={card.img} alt={card.alt} />
+                <OptimizedImage src={card.img} alt={card.alt}  />
                 <div className="card-body">
                   <div className="card-meta">
                     <span className="date">
-                      <img src={DATE_ICON} alt="" />
+                      <OptimizedImage src={DATE_ICON} alt=""  />
                       {card.date}
                     </span>
                     <span className="category">{card.category}</span>
@@ -311,10 +312,10 @@ export default function Newsletter() {
           </div>
           <div className="featured-image">
             {featured.img && (
-              <img
+              <OptimizedImage
                 src={featured.img}
                 alt={featured.alt || featured.title || "Featured newsletter"}
-              />
+               />
             )}
           </div>
         </section>

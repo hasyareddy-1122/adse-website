@@ -1,3 +1,4 @@
+import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -87,14 +88,14 @@ export default function FacultyDetail() {
           <div className="fd-faculty-details">
             <div className="fd-faculty-left">
               {faculty.image && (
-                <img
+                <OptimizedImage
                   src={
                     faculty.image.startsWith("http")
                       ? faculty.image
                       : `/${faculty.image.replace(/^\/+/, "")}`
                   }
                   alt={faculty.name || "Faculty"}
-                />
+                 />
               )}
 
               <h2>{faculty.name}</h2>
