@@ -1,9 +1,9 @@
 /* Role-adaptive dashboard.
- *  STUDENT     → own status tracking (read-only)
- *  FACULTY     → upload/manage documents for subjects they teach
- *  ADMIN (HOD) → invite/remove faculties, manage users, directory,
- *                classes & subjects, all documents
- *  SUPER_ADMIN → everything above + site content editor + admin invites */
+-  STUDENT     → own status tracking (read-only)
+-  FACULTY     → own profile editor + upload/manage documents for subjects they teach
+-  ADMIN (HOD) → invite/remove faculties, manage users, directory,
+-                newsletter, service-learning & department activities
+-  SUPER_ADMIN → everything above + full event management + site content editor + admin invites */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -30,6 +30,31 @@ const EMPTY_FACULTY_PROFILE = {
   website: "",
   cabinLocation: "",
 };
+
+const EMPTY_EVENT_FORM = {
+  title: "",
+  description: "",
+  imageUrl: "",
+  eventDate: "",
+  startTime: "",
+  endTime: "",
+  venue: "",
+  status: "DRAFT",
+  isFeatured: false,
+};
+
+function toDateInputValue(rawDate) {
+  if (!rawDate) return "";
+  const parsed = new Date(rawDate);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toISOString().slice(0, 10);
+}
+
+function resolvePreviewUrl(url) {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return getApiUrl(url.startsWith("/") ? url : `/${url}`);
+}
 
 /* ─── STUDENT ─────────────────────────────────────────────────────────────── */
 
@@ -1000,326 +1025,499 @@ function DirectoryPanel({ onErr, flashFn }) {
   );
 }
 
-/* ─── STAFF: Academics ────────────────────────────────────────────────────── */
+/* ─── SUPER ADMIN: Event Management ───────────────────────────────────────── */
 
-function AcademicsPanel({ onErr, flashFn, facultyUsers }) {
-  const [classes, setClasses] = useState(null);
+function EventsManagementPanel({ onErr, flashFn }) {
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [form, setForm] = useState(EMPTY_EVENT_FORM);
+  const [editingId, setEditingId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const refreshClasses = useCallback(async () => {
+  const refreshEvents = useCallback(async () => {
     setLoading(true);
     setLoadError("");
     try {
-      const d = await onErr(apiRequest("/api/classes"));
-      setClasses(d.classes);
+      const data = await onErr(apiRequest("/api/events?includeDrafts=true"));
+      setEvents(Array.isArray(data?.events) ? data.events : []);
     } catch (err) {
-      setLoadError(err?.message || "Failed to load classes.");
+      setLoadError(err?.message || "Failed to load events.");
     } finally {
       setLoading(false);
     }
   }, [onErr]);
 
   useEffect(() => {
-    refreshClasses();
-  }, [refreshClasses]);
+    refreshEvents();
+  }, [refreshEvents]);
 
-  async function addClass(e) {
-    e.preventDefault();
-    const rawName = new FormData(e.target).get("name");
-    const name = rawName ? rawName.trim() : "";
-    if (!name) return;
-    try {
-      await onErr(
-        apiRequest("/api/classes", { method: "POST", body: { name } }),
-      );
-      flashFn("Class added.");
-      e.target.reset();
-      await refreshClasses();
-    } catch {
-      /* handled */
+  function resetForm() {
+    setEditingId(null);
+    setForm(EMPTY_EVENT_FORM);
+    setFormError("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   }
 
-  async function deleteClass(id) {
-    if (!confirm("Delete this class AND all its subjects/documents?")) return;
-    try {
-      await onErr(apiRequest(`/api/classes/${id}`, { method: "DELETE" }));
-      flashFn("Class removed.");
-      await refreshClasses();
-    } catch {
-      /* handled */
+  function startEdit(ev) {
+    setEditingId(ev.id);
+    setFormError("");
+    setForm({
+      title: ev.title ?? "",
+      description: ev.description ?? "",
+      imageUrl: ev.imageUrl ?? "",
+      eventDate: toDateInputValue(ev.eventDate),
+      startTime: ev.startTime ?? "",
+      endTime: ev.endTime ?? "",
+      venue: ev.venue ?? "",
+      status: ev.status ?? "DRAFT",
+      isFeatured: Boolean(ev.isFeatured),
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   }
 
-  async function addSubject(e, classId) {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    const title = fd.get("title") ? fd.get("title").trim() : "";
-    const code = fd.get("code") ? fd.get("code").trim() : "";
-    if (!title || !code) return;
+  async function handleImageFileChange(e) {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    setFormError("");
+    setUploadingImage(true);
     try {
-      await onErr(
-        apiRequest("/api/classes/subjects", {
+      const fd = new FormData();
+      fd.append("image", selectedFile);
+      const res = await onErr(
+        apiRequest("/api/events/upload", {
           method: "POST",
-          body: {
-            title,
-            code,
-            classSectionId: Number(classId),
-          },
+          formData: fd,
         }),
       );
-      flashFn("Subject added.");
-      await refreshClasses();
-    } catch {
-      /* handled */
+      if (res?.imageUrl) {
+        setForm((prev) => ({ ...prev, imageUrl: res.imageUrl }));
+        flashFn("Event banner image uploaded.");
+      }
+    } catch (err) {
+      setFormError(err?.message || "Image upload failed.");
+    } finally {
+      setUploadingImage(false);
     }
   }
 
-  async function assignTeacher(subjectId, teacherId) {
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setFormError("");
+
+    if (!form.title.trim()) {
+      setFormError("Event title is required.");
+      return;
+    }
+    if (!form.description.trim()) {
+      setFormError("Event description is required.");
+      return;
+    }
+    if (!form.eventDate) {
+      setFormError("Event date is required.");
+      return;
+    }
+    if (!form.venue.trim()) {
+      setFormError("Event venue is required.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        imageUrl: form.imageUrl.trim() || null,
+        eventDate: form.eventDate,
+        startTime: form.startTime.trim() || null,
+        endTime: form.endTime.trim() || null,
+        venue: form.venue.trim(),
+        status: form.status,
+        isFeatured: Boolean(form.isFeatured),
+      };
+
+      if (editingId) {
+        await onErr(
+          apiRequest(`/api/events/${editingId}`, {
+            method: "PUT",
+            body: payload,
+          }),
+        );
+        flashFn("Event updated successfully.");
+      } else {
+        await onErr(
+          apiRequest("/api/events", {
+            method: "POST",
+            body: payload,
+          }),
+        );
+        flashFn(
+          payload.status === "PUBLISHED"
+            ? "Event created and published."
+            : "Event saved as draft.",
+        );
+      }
+
+      resetForm();
+      await refreshEvents();
+    } catch (err) {
+      setFormError(err?.message || "Failed to save event.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function togglePublish(ev) {
+    const nextStatus = ev.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
     try {
       await onErr(
-        apiRequest(`/api/classes/subjects/${subjectId}`, {
+        apiRequest(`/api/events/${ev.id}/status`, {
           method: "PATCH",
-          body: { teacherId: teacherId ? Number(teacherId) : null },
+          body: { status: nextStatus },
         }),
       );
-      flashFn(teacherId ? "Teacher assigned." : "Teacher unassigned.");
-      await refreshClasses();
+      flashFn(
+        nextStatus === "PUBLISHED"
+          ? `"${ev.title}" published.`
+          : `"${ev.title}" moved to draft.`,
+      );
+      await refreshEvents();
     } catch {
       /* handled */
     }
   }
 
-  async function deleteSubject(id) {
-    if (!confirm("Delete this subject and its documents?")) return;
+  async function toggleFeatured(ev) {
+    const nextFeatured = !ev.isFeatured;
     try {
       await onErr(
-        apiRequest(`/api/classes/subjects/${id}`, { method: "DELETE" }),
+        apiRequest(`/api/events/${ev.id}/featured`, {
+          method: "PATCH",
+          body: { isFeatured: nextFeatured },
+        }),
       );
-      flashFn("Subject removed.");
-      await refreshClasses();
+      flashFn(
+        nextFeatured
+          ? `"${ev.title}" marked as featured.`
+          : `"${ev.title}" removed from featured.`,
+      );
+      await refreshEvents();
     } catch {
       /* handled */
     }
   }
 
-  if (loading) {
-    return (
-      <section className="panel">
-        <h2>Classes &amp; subjects</h2>
-        <p className="empty">Loading…</p>
-      </section>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <section className="panel">
-        <h2>Classes &amp; subjects</h2>
-        <div className="alert error">{loadError}</div>
-        <button type="button" className="btn" onClick={refreshClasses}>
-          Retry
-        </button>
-      </section>
-    );
+  async function deleteEvent(ev) {
+    if (!confirm(`Delete event "${ev.title}" permanently?`)) return;
+    try {
+      await onErr(apiRequest(`/api/events/${ev.id}`, { method: "DELETE" }));
+      if (editingId === ev.id) {
+        resetForm();
+      }
+      flashFn("Event deleted.");
+      await refreshEvents();
+    } catch {
+      /* handled */
+    }
   }
 
   return (
     <section className="panel">
-      <h2>Classes &amp; subjects</h2>
-      <form onSubmit={addClass} className="inline cols">
+      <h2>Department Event Management (Super Admin)</h2>
+      <p className="muted">
+        Create, schedule, publish, feature, and manage all department events.
+        Only published events appear on the public website.
+      </p>
+
+      {formError && (
+        <div className="alert error" role="alert">
+          {formError}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="inline">
+        <h3>{editingId ? "Edit Event" : "Create New Event"}</h3>
+        <div className="grid-2">
+          <div className="field">
+            <label htmlFor="ev-title">Event Title *</label>
+            <input
+              id="ev-title"
+              type="text"
+              required
+              disabled={saving}
+              placeholder="National Conference on Generative AI"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="ev-venue">Venue *</label>
+            <input
+              id="ev-venue"
+              type="text"
+              required
+              disabled={saving}
+              placeholder="Main Auditorium, Block II, Kengeri Campus"
+              value={form.venue}
+              onChange={(e) => setForm({ ...form, venue: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="ev-date">Event Date *</label>
+            <input
+              id="ev-date"
+              type="date"
+              required
+              disabled={saving}
+              value={form.eventDate}
+              onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="ev-status">Publication Status</label>
+            <select
+              id="ev-status"
+              disabled={saving}
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}>
+              <option value="DRAFT">Draft (Hidden from public)</option>
+              <option value="PUBLISHED">Published (Visible on site)</option>
+            </select>
+          </div>
+
+          <div className="field">
+            <label htmlFor="ev-start-time">Start Time</label>
+            <input
+              id="ev-start-time"
+              type="text"
+              disabled={saving}
+              placeholder="09:30 AM"
+              value={form.startTime}
+              onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="ev-end-time">End Time</label>
+            <input
+              id="ev-end-time"
+              type="text"
+              disabled={saving}
+              placeholder="04:30 PM"
+              value={form.endTime}
+              onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="ev-image-file">
+              Upload Event Banner (PNG, JPEG, WEBP, AVIF · max 10 MB)
+            </label>
+            <input
+              ref={fileInputRef}
+              id="ev-image-file"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
+              disabled={saving || uploadingImage}
+              onChange={handleImageFileChange}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="ev-image-url">Or Event Image URL</label>
+            <input
+              id="ev-image-url"
+              type="text"
+              disabled={saving || uploadingImage}
+              placeholder="/api/events/images/... or https://..."
+              value={form.imageUrl}
+              onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+            />
+          </div>
+        </div>
+
+        {form.imageUrl && (
+          <div style={{ margin: "10px 0" }}>
+            <img
+              src={resolvePreviewUrl(form.imageUrl)}
+              alt="Event banner preview"
+              style={{
+                maxWidth: 260,
+                maxHeight: 150,
+                objectFit: "cover",
+                borderRadius: 6,
+                border: "1px solid #d4d4d4",
+              }}
+            />
+          </div>
+        )}
+
         <div className="field">
-          <label htmlFor="new-class-name">New class name</label>
-          <input
-            id="new-class-name"
-            type="text"
-            name="name"
+          <label htmlFor="ev-description">Event Description *</label>
+          <textarea
+            id="ev-description"
+            rows={4}
             required
-            placeholder="VII Semester - Section B"
+            disabled={saving}
+            placeholder="Describe the event objectives, speakers, target audience, and schedule."
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
         </div>
-        <button type="submit" className="btn">
-          Add class
-        </button>
-      </form>
-      {!classes.length && <p className="empty">No classes yet.</p>}
-      {classes.map((c) => (
-        <div className="class-block" key={c.id}>
-          <h3>
-            {c.name}
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => deleteClass(c.id)}>
-              Delete class
-            </button>
-          </h3>
-          {c.subjects.length === 0 && (
-            <p className="empty">No subjects in this class.</p>
-          )}
-          {c.subjects.map((s) => (
-            <div className="subject-row" key={s.id}>
-              <code>{s.code}</code>
-              <strong style={{ fontSize: ".88rem" }}>{s.title}</strong>
-              <select
-                value={s.teacher?.id ?? ""}
-                onChange={(e) => assignTeacher(s.id, e.target.value)}>
-                <option value="">— unassigned —</option>
-                {facultyUsers.map((fu) => (
-                  <option key={fu.id} value={fu.id}>
-                    {fu.name}
-                  </option>
-                ))}
-              </select>
-              <span className="muted">
-                {s.documentCount} doc{s.documentCount === 1 ? "" : "s"}
-              </span>
-              <button
-                className="btn btn-danger btn-sm"
-                onClick={() => deleteSubject(s.id)}>
-                ✕
-              </button>
-            </div>
-          ))}
-          <form
-            className="inline cols"
-            style={{ marginTop: 12 }}
-            onSubmit={(e) => addSubject(e, c.id)}>
-            <div className="field">
-              <label htmlFor={`subj-title-${c.id}`}>Subject title</label>
-              <input
-                id={`subj-title-${c.id}`}
-                type="text"
-                name="title"
-                required
-                placeholder="Operating Systems"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor={`subj-code-${c.id}`}>Code</label>
-              <input
-                id={`subj-code-${c.id}`}
-                type="text"
-                name="code"
-                required
-                placeholder="OS401"
-              />
-            </div>
-            <button
-              type="submit"
-              className="btn btn-sm"
-              style={{ alignSelf: "end", marginBottom: 2 }}>
-              Add subject
-            </button>
-          </form>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            alignItems: "center",
+            marginBottom: 12,
+          }}>
+          <input
+            id="ev-featured"
+            type="checkbox"
+            checked={form.isFeatured}
+            disabled={saving}
+            onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })}
+          />
+          <label htmlFor="ev-featured">
+            Feature this event on the Home page
+          </label>
         </div>
-      ))}
-    </section>
-  );
-}
 
-/* ─── STAFF: All Documents ────────────────────────────────────────────────── */
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            type="submit"
+            className="btn"
+            disabled={saving || uploadingImage}>
+            {uploadingImage
+              ? "Uploading image…"
+              : saving
+                ? "Saving…"
+                : editingId
+                  ? "Update Event"
+                  : "Save Event"}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={saving}
+              onClick={resetForm}>
+              Cancel Edit
+            </button>
+          )}
+        </div>
+      </form>
 
-function AllDocsPanel({ onErr, deleteDocument }) {
-  const [documents, setDocuments] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-
-  const refreshAllDocs = useCallback(async () => {
-    setLoading(true);
-    setLoadError("");
-    try {
-      const d = await onErr(apiRequest("/api/documents"));
-      setDocuments(d.documents);
-    } catch (err) {
-      setLoadError(err?.message || "Failed to load documents.");
-    } finally {
-      setLoading(false);
-    }
-  }, [onErr]);
-
-  useEffect(() => {
-    refreshAllDocs();
-  }, [refreshAllDocs]);
-
-  if (loading) {
-    return (
-      <section className="panel">
-        <h2>All documents</h2>
-        <p className="empty">Loading…</p>
-      </section>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <section className="panel">
-        <h2>All documents</h2>
-        <div className="alert error">{loadError}</div>
-        <button type="button" className="btn" onClick={refreshAllDocs}>
-          Retry
-        </button>
-      </section>
-    );
-  }
-
-  return (
-    <section className="panel">
-      <h2>All documents</h2>
-      {!documents.length ? (
-        <p className="empty">No documents uploaded yet.</p>
+      <h3 style={{ marginTop: 24 }}>All Events ({events.length})</h3>
+      {loading ? (
+        <p className="empty">Loading events…</p>
+      ) : loadError ? (
+        <div>
+          <div className="alert error" role="alert">
+            {loadError}
+          </div>
+          <button type="button" className="btn btn-sm" onClick={refreshEvents}>
+            Retry
+          </button>
+        </div>
+      ) : events.length === 0 ? (
+        <p className="empty">No events created yet.</p>
       ) : (
         <table className="data">
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Subject</th>
-              <th>Uploaded by</th>
-              <th>Visibility</th>
-              <th>Date</th>
+              <th>Event</th>
+              <th>Date &amp; Time</th>
+              <th>Venue</th>
+              <th>Status</th>
+              <th>Featured</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {documents.map((d) => (
-              <tr key={d.id}>
-                <td>
-                  {d.title}
-                  <br />
-                  <span className="muted">
-                    {d.fileName} · {fmtBytes(d.sizeBytes)}
-                  </span>
-                </td>
-                <td>
-                  <code style={{ fontSize: ".78rem", color: "#9ec5ee" }}>
-                    {d.subject.code}
-                  </code>{" "}
-                  {d.subject.className || ""}
-                </td>
-                <td>{d.uploadedBy.name}</td>
-                <td>
-                  <span
-                    className={`pill ${d.isPublic ? "pill-public" : "pill-private"}`}>
-                    {d.isPublic ? "Public" : "Private"}
-                  </span>
-                </td>
-                <td className="muted">{fmtDate(d.createdAt)}</td>
-                <td className="actions">
-                  <a
-                    className="btn btn-ghost btn-sm"
-                    href={getApiUrl(d.downloadUrl)}
-                    target="_blank"
-                    rel="noopener">
-                    View
-                  </a>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => deleteDocument(d.id, refreshAllDocs)}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {events.map((ev) => {
+              const timeStr =
+                ev.startTime && ev.endTime
+                  ? `${ev.startTime} – ${ev.endTime}`
+                  : ev.startTime || "—";
+
+              return (
+                <tr key={ev.id}>
+                  <td>
+                    {ev.imageUrl && (
+                      <img
+                        className="thumb"
+                        src={resolvePreviewUrl(ev.imageUrl)}
+                        alt=""
+                      />
+                    )}
+                    <strong>{ev.title}</strong>
+                    <br />
+                    <span className="muted">
+                      {ev.description.length > 80
+                        ? `${ev.description.slice(0, 80)}…`
+                        : ev.description}
+                    </span>
+                  </td>
+                  <td>
+                    {fmtDate(ev.eventDate)}
+                    <br />
+                    <span className="muted">{timeStr}</span>
+                  </td>
+                  <td>{ev.venue}</td>
+                  <td>
+                    <span
+                      className={`pill ${
+                        ev.status === "PUBLISHED"
+                          ? "pill-APPROVED"
+                          : "pill-PENDING"
+                      }`}>
+                      {ev.status}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => toggleFeatured(ev)}>
+                      {ev.isFeatured ? "★ Featured" : "☆ Standard"}
+                    </button>
+                  </td>
+                  <td className="actions">
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => togglePublish(ev)}>
+                      {ev.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => startEdit(ev)}>
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      onClick={() => deleteEvent(ev)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
@@ -1327,100 +1525,7 @@ function AllDocsPanel({ onErr, deleteDocument }) {
   );
 }
 
-/* ─── SUPER ADMIN: Content Editor ────────────────────────────────────────── */
-
-function DepartmentEventsEditor({ value, onChange }) {
-  let events = [];
-
-  try {
-    const parsed = JSON.parse(value || "[]");
-    events = Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return (
-      <p className="alert error">The saved events data is invalid JSON.</p>
-    );
-  }
-
-  function updateEvent(index, field, nextValue) {
-    const updated = events.map((event, i) =>
-      i === index ? { ...event, [field]: nextValue } : event,
-    );
-
-    onChange(JSON.stringify(updated, null, 2));
-  }
-
-  function addEvent() {
-    const updated = [
-      ...events,
-      {
-        id: Date.now(),
-        date: "",
-        title: "",
-        description: "",
-      },
-    ];
-
-    onChange(JSON.stringify(updated, null, 2));
-  }
-
-  function deleteEvent(index) {
-    const updated = events.filter((_, i) => i !== index);
-    onChange(JSON.stringify(updated, null, 2));
-  }
-
-  return (
-    <div className="department-events-editor">
-      {events.map((event, index) => (
-        <fieldset key={event.id ?? index} className="content-key">
-          <legend>Event {index + 1}</legend>
-
-          <div className="field">
-            <label htmlFor={`event-${index}-date`}>Date</label>
-            <input
-              id={`event-${index}-date`}
-              type="date"
-              value={event.date ?? ""}
-              onChange={(e) => updateEvent(index, "date", e.target.value)}
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor={`event-${index}-title`}>Title</label>
-            <input
-              id={`event-${index}-title`}
-              type="text"
-              value={event.title ?? ""}
-              onChange={(e) => updateEvent(index, "title", e.target.value)}
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor={`event-${index}-description`}>Description</label>
-            <textarea
-              id={`event-${index}-description`}
-              rows={3}
-              value={event.description ?? ""}
-              onChange={(e) =>
-                updateEvent(index, "description", e.target.value)
-              }
-            />
-          </div>
-
-          <button
-            type="button"
-            className="btn btn-danger btn-sm"
-            onClick={() => deleteEvent(index)}>
-            Delete Event
-          </button>
-        </fieldset>
-      ))}
-
-      <button type="button" className="btn" onClick={addEvent}>
-        + Add Event
-      </button>
-    </div>
-  );
-}
+/* ─── SUPER ADMIN / HOD: Content Editor ──────────────────────────────────── */
 
 function DepartmentActivitiesEditor({ value, onChange }) {
   let activities = [];
@@ -1562,7 +1667,6 @@ function ContentEditor({ onErr, flashFn, userRole }) {
 
     if (typeof value === "string") return "text";
 
-    // Keep structured content on the existing editor for now.
     return "json";
   }
 
@@ -1645,13 +1749,9 @@ function ContentEditor({ onErr, flashFn, userRole }) {
   }
 
   async function saveKey(key) {
-    console.log("[ContentEditor] Save clicked:", key);
     setJsonError("");
     let value;
     const rawValue = drafts[key];
-
-    // Parse JSON only when the original value was structured data.
-    // Parse JSON when the edited value contains a JSON object or array.
     const trimmedValue = rawValue.trim();
 
     if (trimmedValue.startsWith("{") || trimmedValue.startsWith("[")) {
@@ -1704,11 +1804,10 @@ function ContentEditor({ onErr, flashFn, userRole }) {
       userRole !== "SUPER_ADMIN" &&
       !key.startsWith("newsletter.") &&
       !key.startsWith("service-learning.") &&
-      !key.startsWith("department.events") &&
       !key.startsWith("department.activities")
     ) {
       setJsonError(
-        "HoD can create only newsletter.*, service-learning.*, department.events* and department.activities* keys.",
+        "HoD can create only newsletter.*, service-learning.*, and department.activities* keys.",
       );
       return;
     }
@@ -1748,7 +1847,9 @@ function ContentEditor({ onErr, flashFn, userRole }) {
       </section>
     );
 
-  const allKeys = Object.keys(content || {});
+  const allKeys = Object.keys(content || {}).filter(
+    (key) => !key.startsWith("department.events"),
+  );
 
   const keys =
     userRole === "SUPER_ADMIN"
@@ -1757,7 +1858,6 @@ function ContentEditor({ onErr, flashFn, userRole }) {
           (key) =>
             key.startsWith("newsletter.") ||
             key.startsWith("service-learning.") ||
-            key.startsWith("department.events") ||
             key.startsWith("department.activities"),
         );
 
@@ -1800,13 +1900,6 @@ function ContentEditor({ onErr, flashFn, userRole }) {
           </header>
           {k === "newsletter.cards" ? (
             <NewsletterCardsEditor
-              value={drafts[k] ?? "[]"}
-              onChange={(nextValue) =>
-                setDrafts((prev) => ({ ...prev, [k]: nextValue }))
-              }
-            />
-          ) : k === "department.events" ? (
-            <DepartmentEventsEditor
               value={drafts[k] ?? "[]"}
               onChange={(nextValue) =>
                 setDrafts((prev) => ({ ...prev, [k]: nextValue }))
@@ -1940,9 +2033,10 @@ export default function Dashboard() {
         <p className="page-sub">
           {
             {
-              SUPER_ADMIN: "Full control over site data, users and content.",
+              SUPER_ADMIN:
+                "Full control over site data, events, users and content.",
               ADMIN:
-                "Manage faculties via email invitations, classes, subjects and the directory.",
+                "Manage faculties via email invitations, directory, newsletter, service-learning and department activities.",
               FACULTY: "Upload and manage documents for your subjects only.",
               STUDENT: "Track your application and project statuses.",
             }[user.role]
@@ -1970,6 +2064,10 @@ export default function Dashboard() {
           />
         )}
         {isStaff && <DirectoryPanel onErr={onErr} flashFn={flashFn} />}
+
+        {user.role === "SUPER_ADMIN" && (
+          <EventsManagementPanel onErr={onErr} flashFn={flashFn} />
+        )}
 
         {(user.role === "SUPER_ADMIN" || user.role === "ADMIN") && (
           <ContentEditor onErr={onErr} flashFn={flashFn} userRole={user.role} />

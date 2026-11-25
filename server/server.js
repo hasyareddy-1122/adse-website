@@ -15,6 +15,7 @@ import classesRoutes from './routes/classes.routes.js';
 import documentsRoutes from './routes/documents.routes.js';
 import contentRoutes from './routes/content.routes.js';
 import statusesRoutes from './routes/statuses.routes.js';
+import eventsRoutes from './routes/events.routes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -145,6 +146,7 @@ app.use('/api/classes', classesRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/statuses', statusesRoutes);
+app.use('/api/events', eventsRoutes);
 
 // Unknown API routes -> JSON 404
 app.use('/api', (_req, res) => res.status(404).json({ error: 'API route not found' }));
@@ -172,16 +174,16 @@ app.use((err, _req, res, _next) => {
       err.code === 'LIMIT_FILE_SIZE' ? 'File exceeds the 25 MB limit' : `Upload error: ${err.message}`;
     return res.status(400).json({ error: msg });
   }
-if (err && err.code === 'P2002') {
-  console.error('Prisma unique constraint error:', {
-    model: err.meta?.modelName,
-    target: err.meta?.target,
-  });
+  if (err && err.code === 'P2002') {
+    console.error('Prisma unique constraint error:', {
+      model: err.meta?.modelName,
+      target: err.meta?.target,
+    });
 
-  return res.status(409).json({
-    error: 'A record with this unique value already exists',
-  });
-}
+    return res.status(409).json({
+      error: 'A record with this unique value already exists',
+    });
+  }
   console.error(err);
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });

@@ -1,4 +1,3 @@
-
 import { Router } from 'express';
 import prisma from '../db.js';
 import { requireRole } from '../auth.js';
@@ -6,7 +5,8 @@ import { requireRole } from '../auth.js';
 const router = Router();
 
 // Super Admin can manage all content.
-// HoD (ADMIN) can manage Newsletter, Service Learning and Department Events.
+// HoD (ADMIN) can manage Newsletter, Service Learning and Department Activities.
+// Event management (department.events* and /api/events) is restricted to SUPER_ADMIN only.
 function canManageContentKey(user, key) {
   if (user?.role === 'SUPER_ADMIN') {
     return true;
@@ -19,7 +19,6 @@ function canManageContentKey(user, key) {
   return (
     key.startsWith('newsletter.') ||
     key.startsWith('service-learning.') ||
-    key.startsWith('department.events') ||
     key.startsWith('department.activities')
   );
 }
@@ -80,10 +79,9 @@ router.get('/:key', async (req, res, next) => {
   }
 });
 
-
 // PUT /api/content/:key
 // SUPER_ADMIN: any key.
-// ADMIN (HoD): newsletter.*, service-learning.* and department.events*.
+// ADMIN (HoD): newsletter.*, service-learning.*, and department.activities*.
 router.put(
   '/:key',
   requireRole('ADMIN', 'SUPER_ADMIN'),
@@ -133,7 +131,7 @@ router.put(
 
 // DELETE /api/content/:key
 // SUPER_ADMIN: any key.
-// ADMIN (HoD): newsletter.*, service-learning.* and department.events*.
+// ADMIN (HoD): newsletter.*, service-learning.*, and department.activities*.
 router.delete(
   '/:key',
   requireRole('ADMIN', 'SUPER_ADMIN'),

@@ -57,11 +57,11 @@ export default function Home() {
     };
   }, []);
 
-  // Load Department Events
+  // Load Department Activities from /api/content
   useEffect(() => {
     let cancelled = false;
 
-    async function loadDepartmentEvents() {
+    async function loadDepartmentActivities() {
       try {
         const res = await fetch(getApiUrl("/api/content"), {
           cache: "no-store",
@@ -72,12 +72,62 @@ export default function Home() {
         }
 
         const payload = await res.json();
-        const events = payload?.content?.["department.events"];
         const activities = payload?.content?.["department.activities"];
 
         if (!cancelled) {
-          setDepartmentEvents(Array.isArray(events) ? events : []);
           setDepartmentActivities(Array.isArray(activities) ? activities : []);
+        }
+      } catch (err) {
+        console.error("Failed to load Department Activities:", err);
+      }
+    }
+
+    loadDepartmentActivities();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Load Published Events (prioritizing featured & upcoming) from /api/events
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadDepartmentEvents() {
+      try {
+        const res = await fetch(getApiUrl("/api/events"), {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error(`Events API failed: HTTP ${res.status}`);
+        }
+
+        const payload = await res.json();
+        const allEvents = Array.isArray(payload?.events) ? payload.events : [];
+
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+
+        const featured = allEvents.filter((e) => e.isFeatured);
+        const upcoming = allEvents.filter((e) => {
+          const d = e.eventDate ? new Date(e.eventDate) : null;
+          return d && !Number.isNaN(d.getTime()) && d >= startOfToday;
+        });
+
+        const combined = [];
+        const seenIds = new Set();
+
+        for (const ev of [...featured, ...upcoming, ...allEvents]) {
+          if (!seenIds.has(ev.id)) {
+            seenIds.add(ev.id);
+            combined.push(ev);
+          }
+          if (combined.length >= 4) break;
+        }
+
+        if (!cancelled) {
+          setDepartmentEvents(combined);
         }
       } catch (err) {
         console.error("Failed to load Department Events:", err);
@@ -438,8 +488,8 @@ export default function Home() {
           </h2>
           {departmentEvents.length > 0 ? (
             departmentEvents.map((event, index) => {
-              const parsedDate = event.date
-                ? new Date(`${event.date}T00:00:00`)
+              const parsedDate = event.eventDate
+                ? new Date(event.eventDate)
                 : null;
 
               const validDate =
@@ -462,6 +512,11 @@ export default function Home() {
                   })
                 : "To be announced";
 
+              const timeRange =
+                event.startTime && event.endTime
+                  ? `${event.startTime} – ${event.endTime}`
+                  : event.startTime || null;
+
               return (
                 <div className="event" key={event.id ?? index}>
                   <div className="event-date">
@@ -477,6 +532,8 @@ export default function Home() {
                       {event.description}
                       <br />
                       Date: {fullDate}
+                      {timeRange ? ` | Time: ${timeRange}` : ""}
+                      {event.venue ? ` | Venue: ${event.venue}` : ""}
                     </p>
                   </div>
                 </div>
@@ -518,7 +575,7 @@ export default function Home() {
           ) : (
             pageItems.map((f) => (
               <div className="faculty-card" key={f.id}>
-                <img src={`/${f.image}`} alt={f.name} />
+                <img src={`/${f.image}`} alt={f.name} loading="lazy" />
                 <h3>{f.name}</h3>
                 <h4>{f.department}</h4>
                 <p>Specialization: {f.specialization}</p>
@@ -563,6 +620,7 @@ export default function Home() {
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/c2287c794fdf39706a06fbf3d717c89a937951d3?width=789"
                 alt="Curriculum Planning Interface"
+                loading="lazy"
               />
               <h3>Streamlined Curriculum Planning for Educators</h3>
               <p>
@@ -574,12 +632,17 @@ export default function Home() {
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/abeb390e5bcb3ae9ea9bd19c90ff58ea9a03b748?width=789"
                 alt="Resource Management Dashboard"
+                loading="lazy"
               />
               <h3>Efficient Resource Management Made Simple</h3>
               <p>Optimize your resources to enhance learning outcomes.</p>
             </article>
             <article className="feature-card">
-              <img src="/assets/denery-banner1.jpg" alt="Group Discussion" />
+              <img
+                src="/assets/denery-banner1.jpg"
+                alt="Group Discussion"
+                loading="lazy"
+              />
               <h3>Comprehensive Performance Evaluation Tools</h3>
               <p>Track and assess student performance effortlessly.</p>
             </article>
@@ -597,6 +660,7 @@ export default function Home() {
               src="/assets/und-logo.webp"
               alt="Logo"
               className="profile-img"
+              loading="lazy"
             />
           </div>
           <div className="card-body">
@@ -614,7 +678,12 @@ export default function Home() {
           <div
             className="card-header"
             style={{ backgroundImage: "url('/assets/postgrad.jpg')" }}>
-            <img src="/assets/pg-logo.jpg" alt="Logo" className="profile-img" />
+            <img
+              src="/assets/pg-logo.jpg"
+              alt="Logo"
+              className="profile-img"
+              loading="lazy"
+            />
           </div>
           <div className="card-body">
             <h3>Postgraduate</h3>
@@ -628,7 +697,12 @@ export default function Home() {
           <div
             className="card-header"
             style={{ backgroundImage: "url('/assets/phd.jpg')" }}>
-            <img src="/assets/images.png" alt="Logo" className="profile-img" />
+            <img
+              src="/assets/images.png"
+              alt="Logo"
+              className="profile-img"
+              loading="lazy"
+            />
           </div>
           <div className="card-body">
             <h3>PhD</h3>
@@ -646,6 +720,7 @@ export default function Home() {
               src="/assets/ondeg-logo.jpg"
               alt="Logo"
               className="profile-img"
+              loading="lazy"
             />
           </div>
           <div className="card-body">

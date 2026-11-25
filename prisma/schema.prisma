@@ -28,6 +28,7 @@ model User {
   statusesGiven  StudentStatus[] @relation("StatusReviewer")
   ownStatuses    StudentStatus[] @relation("StatusOwner")
   invitations    Invitation[]
+  events         Event[]
 }
 
 // Email-based invitations used by ADMIN/SUPER_ADMIN to onboard
@@ -49,7 +50,6 @@ model Invitation {
 
 // Public-facing faculty directory entries (seeded from faculty.json).
 // Optionally linked to a User account with role FACULTY.
-
 model FacultyProfile {
   id             Int     @id @default(autoincrement())
   name           String
@@ -59,17 +59,16 @@ model FacultyProfile {
   userId         Int?    @unique
   user           User?   @relation(fields: [userId], references: [id])
 
-  designation    String?
-  qualification  String?
-  bio            String?
-  publicEmail    String?
-  researchGate   String?
-  googleScholar  String?
-  orcid          String?
-  website        String?
-  cabinLocation  String?
+  designation   String?
+  qualification String?
+  bio           String?
+  publicEmail   String?
+  researchGate  String?
+  googleScholar String?
+  orcid         String?
+  website       String?
+  cabinLocation String?
 }
-
 
 model ClassSection {
   id        Int       @id @default(autoincrement())
@@ -133,4 +132,26 @@ model StudentStatus {
   updatedAt   DateTime @updatedAt
 
   @@index([studentId])
+}
+
+// Dedicated Event model (replaces basic SiteContent["department.events"])
+// Status values: DRAFT | PUBLISHED (validated at application layer)
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  imageUrl    String?
+  eventDate   DateTime
+  startTime   String?
+  endTime     String?
+  venue       String
+  status      String   @default("DRAFT") // DRAFT | PUBLISHED
+  isFeatured  Boolean  @default(false)
+  createdById Int?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, eventDate])
+  @@index([isFeatured])
 }
