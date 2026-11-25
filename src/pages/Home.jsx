@@ -1,10 +1,18 @@
 import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import {
+  ScrollReveal,
+  StaggerGrid,
+  StaggerItem,
+} from "../components/MotionPrimitives";
 import { getApiUrl } from "../lib/api";
 import "./Home.css";
+
+const HERO_EASE = [0.22, 1, 0.36, 1];
 
 export default function Home() {
   // ── About popup ──
@@ -193,7 +201,11 @@ export default function Home() {
       <section className="hero-section">
         <div className="hero-inner">
           <div className="hero-content">
-            <div className="hero-text">
+            <motion.div
+              className="hero-text"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: HERO_EASE }}>
               <h1>Empowering Learning through AIML and Data Science</h1>
               <p>
                 Our AIML and Data Science departments offer cutting-edge
@@ -201,8 +213,12 @@ export default function Home() {
                 the future. Experience hands-on learning, innovative projects,
                 and a supportive community that fosters growth and success.
               </p>
-            </div>
-            <div className="hero-buttons">
+            </motion.div>
+            <motion.div
+              className="hero-buttons"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.16, ease: HERO_EASE }}>
               <button
                 type="button"
                 className="btn btn-filled"
@@ -223,15 +239,14 @@ export default function Home() {
                 onClick={() => scrollToSection("features")}>
                 Learn More
               </button>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Mission / Vision */}
       <section id="mission-vision" className="mission-vision-section">
-        {" "}
-        <div className="mission-vision-container">
+        <ScrollReveal className="mission-vision-container">
           <div className="mission-vision-content">
             <div className="mission-text">
               <h2>
@@ -287,12 +302,12 @@ export default function Home() {
             alt="Students working on computers"
             className="mission-image"
           />
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* About + HOD */}
       <section id="about">
-        <div className="about-container">
+        <ScrollReveal className="about-container">
           <div className="about-left">
             <h2>About Department</h2>
             <p>
@@ -345,10 +360,10 @@ export default function Home() {
               </ul>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* HOD */}
-        <div className="hod-section">
+        <ScrollReveal className="hod-section" delay={0.1}>
           <div className="hod-container">
             <div className="hod-image">
               <OptimizedImage src="/assets/hod-image.webp" alt="HOD" />
@@ -389,7 +404,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* About popup */}
@@ -462,120 +477,130 @@ export default function Home() {
       </div>
 
       {/* Department Activities & Events */}
-      <section className="department-section">
-        <div className="department-activities">
-          <h2>
-            <span>Department</span> Activities
-          </h2>
+      <ScrollReveal>
+        <section className="department-section">
+          <div className="department-activities">
+            <h2>
+              <span>Department</span> Activities
+            </h2>
 
-          {departmentActivities.length > 0 ? (
-            departmentActivities.map((activity, index) => (
-              <Link
-                key={activity.id ?? index}
-                to={activity.link || "#"}
-                className="activity-card"
-                style={{ color: "#000" }}>
-                {activity.title}
-                <span style={{ color: "#000" }}>→</span>
-              </Link>
-            ))
-          ) : (
-            <p>No department activities have been announced.</p>
-          )}
-        </div>
-        <div className="department-events">
-          <h2>
-            <span>Department</span> Events
-          </h2>
-          {departmentEvents.length > 0 ? (
-            departmentEvents.map((event, index) => {
-              const parsedDate = event.eventDate
-                ? new Date(event.eventDate)
-                : null;
+            {departmentActivities.length > 0 ? (
+              departmentActivities.map((activity, index) => (
+                <Link
+                  key={activity.id ?? index}
+                  to={activity.link || "#"}
+                  className="activity-card"
+                  style={{ color: "#000" }}>
+                  {activity.title}
+                  <span style={{ color: "#000" }}>→</span>
+                </Link>
+              ))
+            ) : (
+              <p>No department activities have been announced.</p>
+            )}
+          </div>
+          <div className="department-events">
+            <h2>
+              <span>Department</span> Events
+            </h2>
+            {departmentEvents.length > 0 ? (
+              departmentEvents.map((event, index) => {
+                const parsedDate = event.eventDate
+                  ? new Date(event.eventDate)
+                  : null;
 
-              const validDate =
-                parsedDate && !Number.isNaN(parsedDate.getTime());
+                const validDate =
+                  parsedDate && !Number.isNaN(parsedDate.getTime());
 
-              const shortDate = validDate
-                ? parsedDate.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "2-digit",
-                  })
-                : "TBA";
+                const shortDate = validDate
+                  ? parsedDate.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "2-digit",
+                    })
+                  : "TBA";
 
-              const year = validDate ? parsedDate.getFullYear() : "";
+                const year = validDate ? parsedDate.getFullYear() : "";
 
-              const fullDate = validDate
-                ? parsedDate.toLocaleDateString("en-US", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })
-                : "To be announced";
+                const fullDate = validDate
+                  ? parsedDate.toLocaleDateString("en-US", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : "To be announced";
 
-              const timeRange =
-                event.startTime && event.endTime
-                  ? `${event.startTime} – ${event.endTime}`
-                  : event.startTime || null;
+                const timeRange =
+                  event.startTime && event.endTime
+                    ? `${event.startTime} – ${event.endTime}`
+                    : event.startTime || null;
 
-              return (
-                <div className="event" key={event.id ?? index}>
-                  <div className="event-date">
-                    {shortDate}
-                    <br />
-                    <span>{year}</span>
-                  </div>
-
-                  <div className="event-details">
-                    <p>
-                      <b>{event.title}</b>
+                return (
+                  <div className="event" key={event.id ?? index}>
+                    <div className="event-date">
+                      {shortDate}
                       <br />
-                      {event.description}
-                      <br />
-                      Date: {fullDate}
-                      {timeRange ? ` | Time: ${timeRange}` : ""}
-                      {event.venue ? ` | Venue: ${event.venue}` : ""}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <p>No department events have been announced.</p>
-          )}
+                      <span>{year}</span>
+                    </div>
 
-          <Link to="/department-events" className="view-all">
-            View all events →
-          </Link>
-        </div>
-      </section>
+                    <div className="event-details">
+                      <p>
+                        <b>{event.title}</b>
+                        <br />
+                        {event.description}
+                        <br />
+                        Date: {fullDate}
+                        {timeRange ? ` | Time: ${timeRange}` : ""}
+                        {event.venue ? ` | Venue: ${event.venue}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p>No department events have been announced.</p>
+            )}
+
+            <Link to="/department-events" className="view-all">
+              View all events →
+            </Link>
+          </div>
+        </section>
+      </ScrollReveal>
 
       {/* Faculty */}
       <section id="faculty">
-        <h1>Meet our Faculties</h1>
-        <section className="faculty-search">
-          <div className="search-container">
-            <OptimizedImage
-              src="https://cdn.builder.io/api/v1/image/assets/5e358c269d9140e1be810ef6482a3f72/2cef4ee11033eecb4a19ef2637573b4246bf4c9b?placeholderIfAbsent=true"
-              alt="Search icon"
-            />
-            <input
-              type="text"
-              id="search-input"
-              placeholder="Search faculty…"
-              aria-label="Search faculty"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </section>
+        <ScrollReveal>
+          <h1>Meet our Faculties</h1>
+          <section className="faculty-search">
+            <div className="search-container">
+              <OptimizedImage
+                src="https://cdn.builder.io/api/v1/image/assets/5e358c269d9140e1be810ef6482a3f72/2cef4ee11033eecb4a19ef2637573b4246bf4c9b?placeholderIfAbsent=true"
+                alt="Search icon"
+              />
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Search faculty…"
+                aria-label="Search faculty"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </section>
+        </ScrollReveal>
 
-        <div id="faculty-container" className="faculty-grid">
-          {pageItems.length === 0 ? (
+        {pageItems.length === 0 ? (
+          <div id="faculty-container" className="faculty-grid">
             <p>No faculty found.</p>
-          ) : (
-            pageItems.map((f) => (
-              <div className="faculty-card" key={f.id}>
+          </div>
+        ) : (
+          <StaggerGrid
+            key={`${currentPage}-${searchQuery}`}
+            id="faculty-container"
+            className="faculty-grid"
+            stagger={0.04}>
+            {pageItems.map((f) => (
+              <StaggerItem className="faculty-card" key={f.id}>
                 <OptimizedImage src={`/${f.image}`} alt={f.name} />
                 <h3>{f.name}</h3>
                 <h4>{f.department}</h4>
@@ -583,10 +608,10 @@ export default function Home() {
                 <Link to={`/faculty?id=${f.id}`}>
                   <button type="button">View</button>
                 </Link>
-              </div>
-            ))
-          )}
-        </div>
+              </StaggerItem>
+            ))}
+          </StaggerGrid>
+        )}
 
         {totalPages > 1 && (
           <div id="pagination" className="pagination">
@@ -604,9 +629,8 @@ export default function Home() {
 
       {/* Features */}
       <section id="features" className="features-section">
-        {" "}
         <div className="features-container">
-          <div className="features-header">
+          <ScrollReveal className="features-header">
             <span className="features-label">Empower</span>
             <h2>TRANSFORMING EDUCATION THROUGH INNOVATIVE SOLUTIONS</h2>
             <p>
@@ -615,9 +639,9 @@ export default function Home() {
               planning to performance evaluation, we provide the tools you need
               to succeed.
             </p>
-          </div>
-          <div className="features-cards">
-            <article className="feature-card">
+          </ScrollReveal>
+          <StaggerGrid className="features-cards" stagger={0.09}>
+            <StaggerItem className="feature-card">
               <OptimizedImage
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/c2287c794fdf39706a06fbf3d717c89a937951d3?width=789"
                 alt="Curriculum Planning Interface"
@@ -627,30 +651,30 @@ export default function Home() {
                 Easily design and manage your curriculum with our intuitive
                 tools.
               </p>
-            </article>
-            <article className="feature-card">
+            </StaggerItem>
+            <StaggerItem className="feature-card">
               <OptimizedImage
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/abeb390e5bcb3ae9ea9bd19c90ff58ea9a03b748?width=789"
                 alt="Resource Management Dashboard"
               />
               <h3>Efficient Resource Management Made Simple</h3>
               <p>Optimize your resources to enhance learning outcomes.</p>
-            </article>
-            <article className="feature-card">
+            </StaggerItem>
+            <StaggerItem className="feature-card">
               <OptimizedImage
                 src="/assets/denery-banner1.jpg"
                 alt="Group Discussion"
               />
               <h3>Comprehensive Performance Evaluation Tools</h3>
               <p>Track and assess student performance effortlessly.</p>
-            </article>
-          </div>
+            </StaggerItem>
+          </StaggerGrid>
         </div>
       </section>
 
       {/* Programs */}
-      <section id="programs">
-        <div className="card">
+      <StaggerGrid id="programs" stagger={0.08}>
+        <StaggerItem className="card">
           <div
             className="card-header"
             style={{ backgroundImage: "url('/assets/college5.avif')" }}>
@@ -668,10 +692,10 @@ export default function Home() {
             </p>
             <button onClick={() => setProgramOpen("undergraduate")}>
               More Info
-            </button>{" "}
+            </button>
           </div>
-        </div>
-        <div className="card">
+        </StaggerItem>
+        <StaggerItem className="card">
           <div
             className="card-header"
             style={{ backgroundImage: "url('/assets/postgrad.avif')" }}>
@@ -686,10 +710,10 @@ export default function Home() {
             <p>Advance your knowledge with specialized postgraduate degrees.</p>
             <button onClick={() => setProgramOpen("postgraduate")}>
               More Info
-            </button>{" "}
+            </button>
           </div>
-        </div>
-        <div className="card">
+        </StaggerItem>
+        <StaggerItem className="card">
           <div
             className="card-header"
             style={{ backgroundImage: "url('/assets/phd.avif')" }}>
@@ -702,12 +726,10 @@ export default function Home() {
           <div className="card-body">
             <h3>PhD</h3>
             <p>Pursue research and innovation with our doctoral programs.</p>
-            <button onClick={() => setProgramOpen("phd")}>
-              More Info
-            </button>{" "}
+            <button onClick={() => setProgramOpen("phd")}>More Info</button>
           </div>
-        </div>
-        <div className="card">
+        </StaggerItem>
+        <StaggerItem className="card">
           <div
             className="card-header"
             style={{ backgroundImage: "url('/assets/onlinedeg.avif')" }}>
@@ -720,12 +742,10 @@ export default function Home() {
           <div className="card-body">
             <h3>Online Degree</h3>
             <p>Learn anytime, anywhere with our flexible online programs.</p>
-            <button onClick={() => setProgramOpen("online")}>
-              More Info
-            </button>{" "}
+            <button onClick={() => setProgramOpen("online")}>More Info</button>
           </div>
-        </div>
-      </section>
+        </StaggerItem>
+      </StaggerGrid>
 
       {/* Programme Information Modals */}
       {programOpen && (
