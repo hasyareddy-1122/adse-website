@@ -11,20 +11,6 @@ import {
 import "./ServiceLearning.css";
 import { getApiUrl } from "../lib/api.js";
 
-import service1Img from "../assets/service1.jpg";
-import service1ImgAvif from "../assets/service1.avif";
-import service2Img from "../assets/service2.jpg";
-import service2ImgAvif from "../assets/service2.avif";
-import service3Img from "../assets/service3.jpg";
-import service3ImgAvif from "../assets/service3.avif";
-import service4Img from "../assets/service4.jpg";
-import service4ImgAvif from "../assets/service4.avif";
-import service5Img from "../assets/service5.png";
-import service5ImgAvif from "../assets/service5.avif";
-import service6Img from "../assets/service6.jpg";
-import service6ImgAvif from "../assets/service6.avif";
-import service7Img from "../assets/service7.jpg";
-import service7ImgAvif from "../assets/service7.avif";
 import serviceBannerImg from "../assets/servicebanner.jpg";
 import serviceBannerImgAvif from "../assets/servicebanner.avif";
 import serviceBanner1Img from "../assets/servicebanner1.jpg";
@@ -33,58 +19,6 @@ import serviceBanner2Img from "../assets/servicebanner2.jpg";
 import serviceBanner2ImgAvif from "../assets/servicebanner2.avif";
 
 const HERO_EASE = [0.22, 1, 0.36, 1];
-
-const NEWSLETTERS = [
-  {
-    title: "Kusuri Mane",
-    subtitle: "Bengaluru",
-    description:
-      "Kusuri Mane is a marketplace for handmade, homemade, fresh-made, local-made, and also rural-made products.",
-    image: service1Img,
-  },
-  {
-    title: "Janapada Loka",
-    subtitle: "Ramanagara",
-    description:
-      "This has become quite popular among tourists as it offers an excellent opportunity to observe the myriad folk art of Karnataka and as well as internalize the Heritage and Culture of the state.",
-    image: service2Img,
-  },
-  {
-    title: "Jungle Lodges and Resorts",
-    subtitle: "Bengaluru",
-    description:
-      "It boasts of numerous sights of natural beauty along with an impressive amount of flora and fauna. Charming grasslands, dense forests, and glistening rivers are a common sight in the state.",
-    image: service3Img,
-  },
-  {
-    title: "Ride for Cause",
-    subtitle: "Bengaluru",
-    description:
-      "It is a non-profit organization in India dedicated to helping underprivileged children reach their full potential—physically, mentally, and emotionally.",
-    image: service4Img,
-  },
-  {
-    title: "Uthishta",
-    subtitle: "Bengaluru",
-    description:
-      "Uthishta is a committed non-profit organization that works towards uplifting and empowering underserved communities through transformative initiatives.",
-    image: service5Img,
-  },
-  {
-    title: "Saahas Zero Waste",
-    subtitle: "Bengaluru",
-    description:
-      "Saahas Waste Management Pvt Ltd, a socio-environmental enterprise also known as Saahas Zero Waste, provides end-to-end waste management services.",
-    image: service6Img,
-  },
-  {
-    title: "Grama Shilpi",
-    subtitle: "Hubballi",
-    description:
-      "Skill upgradation to existing artisans and training to new generation artisans. Diversifying artisan products to meet eco-friendly demand.",
-    image: service7Img,
-  },
-];
 
 export default function ServiceLearning() {
   const [searchQuery, setSearchQuery] = useState("");

@@ -43,6 +43,34 @@ const EMPTY_EVENT_FORM = {
   isFeatured: false,
 };
 
+const EMPTY_ACTIVITY_ITEM = {
+  id: null,
+  title: "",
+  description: "",
+  link: "",
+};
+
+const EMPTY_SERVICE_PROJECT = {
+  id: null,
+  title: "",
+  subtitle: "",
+  description: "",
+  image: "",
+};
+
+const EMPTY_NEWSLETTER_ITEM = {
+  id: null,
+  category: "General",
+  img: "",
+  alt: "",
+  date: "",
+  title: "",
+  subtitle: "",
+  desc: "",
+  readMore: "",
+  downloadPdf: "",
+};
+
 function toDateInputValue(rawDate) {
   if (!rawDate) return "";
   const parsed = new Date(rawDate);
@@ -54,6 +82,31 @@ function resolvePreviewUrl(url) {
   if (!url) return "";
   if (/^https?:\/\//i.test(url)) return url;
   return getApiUrl(url.startsWith("/") ? url : `/${url}`);
+}
+
+function normalizeLinkValue(raw) {
+  const trimmed = (raw || "").trim();
+  if (!trimmed) return "";
+  if (
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("#") ||
+    /^https?:\/\//i.test(trimmed)
+  ) {
+    return trimmed;
+  }
+  return `/${trimmed}`;
+}
+
+function parseJsonArraySafe(raw) {
+  try {
+    const parsed = JSON.parse(raw || "[]");
+    return {
+      items: Array.isArray(parsed) ? parsed : [],
+      invalidJson: false,
+    };
+  } catch {
+    return { items: [], invalidJson: true };
+  }
 }
 
 /* ─── STUDENT ─────────────────────────────────────────────────────────────── */
@@ -732,7 +785,11 @@ function DirectoryPanel({ onErr, flashFn }) {
             <tr key={f.id}>
               <td>
                 {f.image && (
-                  <OptimizedImage className="thumb" src={getApiUrl(f.image)} alt=""  />
+                  <OptimizedImage
+                    className="thumb"
+                    src={getApiUrl(f.image)}
+                    alt=""
+                  />
                 )}
                 {f.name}
               </td>
@@ -1101,7 +1158,7 @@ function EventsManagementPanel({ onErr, flashFn }) {
                 borderRadius: 6,
                 border: "1px solid #d4d4d4",
               }}
-             />
+            />
           </div>
         )}
 
@@ -1203,7 +1260,7 @@ function EventsManagementPanel({ onErr, flashFn }) {
                         className="thumb"
                         src={resolvePreviewUrl(ev.imageUrl)}
                         alt=""
-                       />
+                      />
                     )}
                     <strong>{ev.title}</strong>
                     <br />
@@ -1269,96 +1326,771 @@ function EventsManagementPanel({ onErr, flashFn }) {
 
 /* ─── SUPER ADMIN / HOD: Content Editor ──────────────────────────────────── */
 
-function DepartmentActivitiesEditor({ value, onChange }) {
-  let activities = [];
+function DepartmentActivitiesSection({
+  value,
+  onChange,
+  onSaveSection,
+  savingKey,
+}) {
+  const { items, invalidJson } = parseJsonArraySafe(value);
+  const [form, setForm] = useState(EMPTY_ACTIVITY_ITEM);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [localError, setLocalError] = useState("");
 
-  try {
-    const parsed = JSON.parse(value || "[]");
-    activities = Array.isArray(parsed) ? parsed : [];
-  } catch {
+  if (invalidJson) {
     return (
-      <p className="alert error">The saved activities data is invalid JSON.</p>
+      <p className="alert error" role="alert">
+        The saved activities data is invalid JSON.
+      </p>
     );
   }
 
-  function updateActivity(index, field, nextValue) {
-    const updated = activities.map((activity, i) =>
-      i === index ? { ...activity, [field]: nextValue } : activity,
-    );
-
-    onChange(JSON.stringify(updated, null, 2));
+  function resetForm() {
+    setEditingIndex(null);
+    setForm(EMPTY_ACTIVITY_ITEM);
+    setLocalError("");
   }
 
-  function addActivity() {
-    const updated = [
-      ...activities,
-      {
-        id: Date.now(),
-        title: "",
-        description: "",
-        link: "",
-      },
-    ];
-
-    onChange(JSON.stringify(updated, null, 2));
+  function startEdit(index) {
+    const target = items[index];
+    setEditingIndex(index);
+    setLocalError("");
+    setForm({
+      id: target?.id ?? Date.now() + index,
+      title: target?.title ?? "",
+      description: target?.description ?? "",
+      link: target?.link ?? "",
+    });
   }
 
-  function deleteActivity(index) {
-    const updated = activities.filter((_, i) => i !== index);
-    onChange(JSON.stringify(updated, null, 2));
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    setLocalError("");
+
+    const trimmedTitle = form.title.trim();
+    if (!trimmedTitle) {
+      setLocalError("Activity name is required.");
+      return;
+    }
+
+    const nextItem = {
+      id: form.id ?? Date.now(),
+      title: trimmedTitle,
+      description: form.description.trim(),
+      link: normalizeLinkValue(form.link),
+    };
+
+    const nextList =
+      editingIndex !== null
+        ? items.map((item, idx) => (idx === editingIndex ? nextItem : item))
+        : [...items, nextItem];
+
+    const serialized = JSON.stringify(nextList, null, 2);
+    onChange(serialized);
+    resetForm();
+    if (onSaveSection) {
+      await onSaveSection("department.activities", serialized);
+    }
+  }
+
+  async function handleDelete(index) {
+    const target = items[index];
+    const label = target?.title?.trim() || `Activity ${index + 1}`;
+    if (!confirm(`Delete "${label}"?`)) return;
+
+    const nextList = items.filter((_, idx) => idx !== index);
+    if (editingIndex === index) {
+      resetForm();
+    } else if (editingIndex !== null && index < editingIndex) {
+      setEditingIndex(editingIndex - 1);
+    }
+
+    const serialized = JSON.stringify(nextList, null, 2);
+    onChange(serialized);
+    if (onSaveSection) {
+      await onSaveSection("department.activities", serialized);
+    }
   }
 
   return (
-    <div className="department-activities-editor">
-      {activities.map((activity, index) => (
-        <fieldset key={activity.id ?? index} className="content-key">
-          <legend>Activity {index + 1}</legend>
+    <div className="structured-manager">
+      <p className="muted">
+        Add, edit, and remove activities shown on the Home page.
+      </p>
 
+      {localError && (
+        <div className="alert error" role="alert">
+          {localError}
+        </div>
+      )}
+
+      <form onSubmit={handleFormSubmit} className="inline">
+        <h3>
+          {editingIndex !== null
+            ? `Edit Activity #${editingIndex + 1}`
+            : "Add New Activity"}
+        </h3>
+        <div className="grid-2">
           <div className="field">
-            <label htmlFor={`activity-${index}-title`}>Activity Name</label>
+            <label htmlFor="act-form-title">Activity Name *</label>
             <input
-              id={`activity-${index}-title`}
+              id="act-form-title"
               type="text"
-              value={activity.title ?? ""}
-              onChange={(e) => updateActivity(index, "title", e.target.value)}
+              required
+              placeholder="e.g. CAADS"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
           </div>
 
           <div className="field">
-            <label htmlFor={`activity-${index}-description`}>Description</label>
-            <textarea
-              id={`activity-${index}-description`}
-              rows={3}
-              value={activity.description ?? ""}
-              onChange={(e) =>
-                updateActivity(index, "description", e.target.value)
+            <label htmlFor="act-form-link">Page Link</label>
+            <input
+              id="act-form-link"
+              type="text"
+              placeholder="/caads"
+              value={form.link}
+              onChange={(e) => setForm({ ...form, link: e.target.value })}
+              onBlur={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  link: normalizeLinkValue(e.target.value),
+                }))
               }
             />
           </div>
+        </div>
 
+        <div className="field">
+          <label htmlFor="act-form-desc">Description</label>
+          <textarea
+            id="act-form-desc"
+            rows={3}
+            placeholder="Brief description of the department activity"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            type="submit"
+            className="btn"
+            disabled={savingKey === "department.activities"}>
+            {savingKey === "department.activities"
+              ? "Saving…"
+              : editingIndex !== null
+                ? "Update Activity"
+                : "Save Activity"}
+          </button>
+          {editingIndex !== null && (
+            <button type="button" className="btn btn-ghost" onClick={resetForm}>
+              Cancel Edit
+            </button>
+          )}
+        </div>
+      </form>
+
+      <h3 style={{ marginTop: 24 }}>All Activities ({items.length})</h3>
+      {items.length === 0 ? (
+        <p className="empty">No department activities added yet.</p>
+      ) : (
+        <table className="data">
+          <thead>
+            <tr>
+              <th>Activity</th>
+              <th>Link</th>
+              <th>Description</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr key={item.id ?? idx}>
+                <td>
+                  <strong>{item.title || "Untitled activity"}</strong>
+                </td>
+                <td className="muted">{item.link || "—"}</td>
+                <td className="muted">{item.description || "—"}</td>
+                <td className="actions">
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => startEdit(idx)}>
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDelete(idx)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+function ServiceLearningProjectsSection({
+  value,
+  onChange,
+  onSaveSection,
+  savingKey,
+}) {
+  const { items, invalidJson } = parseJsonArraySafe(value);
+  const [form, setForm] = useState(EMPTY_SERVICE_PROJECT);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [localError, setLocalError] = useState("");
+
+  if (invalidJson) {
+    return (
+      <p className="alert error" role="alert">
+        The saved Service Learning projects data is invalid JSON.
+      </p>
+    );
+  }
+
+  function resetForm() {
+    setEditingIndex(null);
+    setForm(EMPTY_SERVICE_PROJECT);
+    setLocalError("");
+  }
+
+  function startEdit(index) {
+    const target = items[index];
+    setEditingIndex(index);
+    setLocalError("");
+    setForm({
+      id: target?.id ?? Date.now() + index,
+      title: target?.title ?? "",
+      subtitle: target?.subtitle ?? "",
+      description: target?.description ?? "",
+      image: target?.image ?? "",
+    });
+  }
+
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    setLocalError("");
+
+    const trimmedTitle = form.title.trim();
+    if (!trimmedTitle) {
+      setLocalError("Partner / project title is required.");
+      return;
+    }
+
+    const nextItem = {
+      id: form.id ?? Date.now(),
+      title: trimmedTitle,
+      subtitle: form.subtitle.trim(),
+      description: form.description.trim(),
+      image: form.image.trim(),
+    };
+
+    const nextList =
+      editingIndex !== null
+        ? items.map((item, idx) => (idx === editingIndex ? nextItem : item))
+        : [...items, nextItem];
+
+    const serialized = JSON.stringify(nextList, null, 2);
+    onChange(serialized);
+    resetForm();
+    if (onSaveSection) {
+      await onSaveSection("service-learning.projects", serialized);
+    }
+  }
+
+  async function handleDelete(index) {
+    const target = items[index];
+    const label = target?.title?.trim() || `Project ${index + 1}`;
+    if (!confirm(`Delete Service Learning project "${label}"?`)) return;
+
+    const nextList = items.filter((_, idx) => idx !== index);
+    if (editingIndex === index) {
+      resetForm();
+    } else if (editingIndex !== null && index < editingIndex) {
+      setEditingIndex(editingIndex - 1);
+    }
+
+    const serialized = JSON.stringify(nextList, null, 2);
+    onChange(serialized);
+    if (onSaveSection) {
+      await onSaveSection("service-learning.projects", serialized);
+    }
+  }
+
+  return (
+    <div className="structured-manager">
+      <p className="muted">
+        Add, edit, and remove Service Learning partners and community projects.
+      </p>
+
+      {localError && (
+        <div className="alert error" role="alert">
+          {localError}
+        </div>
+      )}
+
+      <form onSubmit={handleFormSubmit} className="inline">
+        <h3>
+          {editingIndex !== null
+            ? `Edit Service Learning Project #${editingIndex + 1}`
+            : "Add New Service Learning Project"}
+        </h3>
+        <div className="grid-2">
           <div className="field">
-            <label htmlFor={`activity-${index}-link`}>Page Link</label>
+            <label htmlFor="sl-form-title">Partner / Project Title *</label>
             <input
-              id={`activity-${index}-link`}
+              id="sl-form-title"
               type="text"
-              placeholder="/caads"
-              value={activity.link ?? ""}
-              onChange={(e) => updateActivity(index, "link", e.target.value)}
+              required
+              placeholder="Organization or project title"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
           </div>
 
-          <button
-            type="button"
-            className="btn btn-danger btn-sm"
-            onClick={() => deleteActivity(index)}>
-            Delete Activity
-          </button>
-        </fieldset>
-      ))}
+          <div className="field">
+            <label htmlFor="sl-form-subtitle">Location / Subtitle</label>
+            <input
+              id="sl-form-subtitle"
+              type="text"
+              placeholder="e.g. Bengaluru"
+              value={form.subtitle}
+              onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
+            />
+          </div>
 
-      <button type="button" className="btn" onClick={addActivity}>
-        + Add Activity
-      </button>
+          <div className="field">
+            <label htmlFor="sl-form-image">Image URL</label>
+            <input
+              id="sl-form-image"
+              type="text"
+              placeholder="/assets/service1.avif or https://..."
+              value={form.image}
+              onChange={(e) => setForm({ ...form, image: e.target.value })}
+            />
+          </div>
+        </div>
+
+        {form.image && (
+          <div style={{ margin: "10px 0" }}>
+            <OptimizedImage
+              src={resolvePreviewUrl(form.image)}
+              alt={form.title || "Service Learning preview"}
+              style={{
+                maxWidth: 240,
+                maxHeight: 140,
+                objectFit: "cover",
+                borderRadius: 6,
+                border: "1px solid #d4d4d4",
+              }}
+            />
+          </div>
+        )}
+
+        <div className="field">
+          <label htmlFor="sl-form-desc">Description</label>
+          <textarea
+            id="sl-form-desc"
+            rows={3}
+            placeholder="Describe the community initiative and student contribution"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            type="submit"
+            className="btn"
+            disabled={savingKey === "service-learning.projects"}>
+            {savingKey === "service-learning.projects"
+              ? "Saving…"
+              : editingIndex !== null
+                ? "Update Project"
+                : "Save Project"}
+          </button>
+          {editingIndex !== null && (
+            <button type="button" className="btn btn-ghost" onClick={resetForm}>
+              Cancel Edit
+            </button>
+          )}
+        </div>
+      </form>
+
+      <h3 style={{ marginTop: 24 }}>
+        All Service Learning Projects ({items.length})
+      </h3>
+      {items.length === 0 ? (
+        <p className="empty">No Service Learning projects added yet.</p>
+      ) : (
+        <table className="data">
+          <thead>
+            <tr>
+              <th>Project / Partner</th>
+              <th>Subtitle</th>
+              <th>Description</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr key={item.id ?? idx}>
+                <td>
+                  {item.image && (
+                    <OptimizedImage
+                      className="thumb"
+                      src={resolvePreviewUrl(item.image)}
+                      alt=""
+                    />
+                  )}
+                  <strong>{item.title || "Untitled project"}</strong>
+                </td>
+                <td className="muted">{item.subtitle || "—"}</td>
+                <td className="muted">{item.description || "—"}</td>
+                <td className="actions">
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => startEdit(idx)}>
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDelete(idx)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+function NewsletterCollectionSection({
+  contentKey,
+  value,
+  onChange,
+  onSaveSection,
+  savingKey,
+  itemLabel = "Newsletter Item",
+}) {
+  const { items, invalidJson } = parseJsonArraySafe(value);
+  const [form, setForm] = useState(EMPTY_NEWSLETTER_ITEM);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [localError, setLocalError] = useState("");
+
+  if (invalidJson) {
+    return (
+      <p className="alert error" role="alert">
+        The saved newsletter data is invalid JSON. Correct it before editing.
+      </p>
+    );
+  }
+
+  function resetForm() {
+    setEditingIndex(null);
+    setForm(EMPTY_NEWSLETTER_ITEM);
+    setLocalError("");
+  }
+
+  function startEdit(index) {
+    const target = items[index];
+    setEditingIndex(index);
+    setLocalError("");
+    setForm({
+      id: target?.id ?? Date.now() + index,
+      category: target?.category ?? "General",
+      img: target?.img ?? "",
+      alt: target?.alt ?? "",
+      date: target?.date ?? "",
+      title: target?.title ?? "",
+      subtitle: target?.subtitle ?? "",
+      desc: target?.desc ?? "",
+      readMore: target?.readMore ?? "",
+      downloadPdf: target?.downloadPdf ?? "",
+    });
+  }
+
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    setLocalError("");
+
+    const trimmedTitle = form.title.trim();
+    if (!trimmedTitle) {
+      setLocalError(`${itemLabel} title is required.`);
+      return;
+    }
+
+    const nextItem = {
+      id: form.id ?? Date.now(),
+      category: (form.category || "General").trim(),
+      img: form.img.trim(),
+      alt: form.alt.trim() || trimmedTitle,
+      date: form.date.trim(),
+      title: trimmedTitle,
+      subtitle: form.subtitle.trim(),
+      desc: form.desc.trim(),
+      readMore: form.readMore.trim(),
+      downloadPdf: form.downloadPdf.trim(),
+    };
+
+    const nextList =
+      editingIndex !== null
+        ? items.map((item, idx) => (idx === editingIndex ? nextItem : item))
+        : [...items, nextItem];
+
+    const serialized = JSON.stringify(nextList, null, 2);
+    onChange(serialized);
+    resetForm();
+    if (onSaveSection) {
+      await onSaveSection(contentKey, serialized);
+    }
+  }
+
+  async function handleDelete(index) {
+    const target = items[index];
+    const label = target?.title?.trim() || `${itemLabel} ${index + 1}`;
+    if (!confirm(`Delete "${label}"?`)) return;
+
+    const nextList = items.filter((_, idx) => idx !== index);
+    if (editingIndex === index) {
+      resetForm();
+    } else if (editingIndex !== null && index < editingIndex) {
+      setEditingIndex(editingIndex - 1);
+    }
+
+    const serialized = JSON.stringify(nextList, null, 2);
+    onChange(serialized);
+    if (onSaveSection) {
+      await onSaveSection(contentKey, serialized);
+    }
+  }
+
+  return (
+    <div className="structured-manager">
+      <p className="muted">
+        Add, edit, and remove entries displayed on the Newsletter page.
+      </p>
+
+      {localError && (
+        <div className="alert error" role="alert">
+          {localError}
+        </div>
+      )}
+
+      <form onSubmit={handleFormSubmit} className="inline">
+        <h3>
+          {editingIndex !== null
+            ? `Edit ${itemLabel} #${editingIndex + 1}`
+            : `Add New ${itemLabel}`}
+        </h3>
+        <div className="grid-2">
+          <div className="field">
+            <label htmlFor={`${contentKey}-form-title`}>Title *</label>
+            <input
+              id={`${contentKey}-form-title`}
+              type="text"
+              required
+              placeholder="Newsletter headline"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${contentKey}-form-date`}>Month and year</label>
+            <input
+              id={`${contentKey}-form-date`}
+              type="text"
+              placeholder="e.g. November 2026"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${contentKey}-form-category`}>Section</label>
+            <input
+              id={`${contentKey}-form-category`}
+              type="text"
+              placeholder="Research, Student, Faculty, Industry, General"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${contentKey}-form-subtitle`}>Subtitle</label>
+            <input
+              id={`${contentKey}-form-subtitle`}
+              type="text"
+              placeholder="Issue or edition subtitle"
+              value={form.subtitle}
+              onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${contentKey}-form-img`}>Image URL</label>
+            <input
+              id={`${contentKey}-form-img`}
+              type="text"
+              placeholder="https://... or /assets/..."
+              value={form.img}
+              onChange={(e) => setForm({ ...form, img: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${contentKey}-form-alt`}>Image alt text</label>
+            <input
+              id={`${contentKey}-form-alt`}
+              type="text"
+              placeholder="Descriptive alt text"
+              value={form.alt}
+              onChange={(e) => setForm({ ...form, alt: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${contentKey}-form-readmore`}>Read More URL</label>
+            <input
+              id={`${contentKey}-form-readmore`}
+              type="text"
+              placeholder="https://..."
+              value={form.readMore}
+              onChange={(e) => setForm({ ...form, readMore: e.target.value })}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${contentKey}-form-pdf`}>Download PDF URL</label>
+            <input
+              id={`${contentKey}-form-pdf`}
+              type="text"
+              placeholder="https://..."
+              value={form.downloadPdf}
+              onChange={(e) =>
+                setForm({ ...form, downloadPdf: e.target.value })
+              }
+            />
+          </div>
+        </div>
+
+        {form.img && (
+          <div style={{ margin: "10px 0" }}>
+            <OptimizedImage
+              src={resolvePreviewUrl(form.img)}
+              alt={form.alt || form.title || ""}
+              style={{
+                maxWidth: 220,
+                maxHeight: 140,
+                objectFit: "contain",
+                borderRadius: 6,
+                border: "1px solid #d4d4d4",
+              }}
+            />
+          </div>
+        )}
+
+        <div className="field">
+          <label htmlFor={`${contentKey}-form-desc`}>Description</label>
+          <textarea
+            id={`${contentKey}-form-desc`}
+            rows={4}
+            placeholder="Summary of the newsletter item"
+            value={form.desc}
+            onChange={(e) => setForm({ ...form, desc: e.target.value })}
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            type="submit"
+            className="btn"
+            disabled={savingKey === contentKey}>
+            {savingKey === contentKey
+              ? "Saving…"
+              : editingIndex !== null
+                ? `Update ${itemLabel}`
+                : `Save ${itemLabel}`}
+          </button>
+          {editingIndex !== null && (
+            <button type="button" className="btn btn-ghost" onClick={resetForm}>
+              Cancel Edit
+            </button>
+          )}
+        </div>
+      </form>
+
+      <h3 style={{ marginTop: 24 }}>
+        All {itemLabel}s ({items.length})
+      </h3>
+      {items.length === 0 ? (
+        <p className="empty">No items added yet.</p>
+      ) : (
+        <table className="data">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Section &amp; Date</th>
+              <th>Summary</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr key={item.id ?? idx}>
+                <td>
+                  {item.img && (
+                    <OptimizedImage
+                      className="thumb"
+                      src={resolvePreviewUrl(item.img)}
+                      alt=""
+                    />
+                  )}
+                  <strong>{item.title || "Untitled item"}</strong>
+                  {item.subtitle ? (
+                    <>
+                      <br />
+                      <span className="muted">{item.subtitle}</span>
+                    </>
+                  ) : null}
+                </td>
+                <td className="muted">
+                  {item.category || "General"}
+                  {item.date ? ` · ${item.date}` : ""}
+                </td>
+                <td className="muted">{item.desc || "—"}</td>
+                <td className="actions">
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => startEdit(idx)}>
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDelete(idx)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
@@ -1370,6 +2102,7 @@ function ContentEditor({ onErr, flashFn, userRole }) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [jsonError, setJsonError] = useState("");
+  const [savingKey, setSavingKey] = useState("");
 
   const refreshContent = useCallback(async () => {
     setLoading(true);
@@ -1412,101 +2145,47 @@ function ContentEditor({ onErr, flashFn, userRole }) {
     return "json";
   }
 
-  function NewsletterCardsEditor({ value, onChange }) {
-    let cards = [];
-
-    try {
-      const parsed = JSON.parse(value || "[]");
-      cards = Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return (
-        <p className="alert error">
-          The saved newsletter data is invalid JSON. Correct it before editing.
-        </p>
-      );
-    }
-
-    function updateCard(index, field, nextValue) {
-      const updated = cards.map((card, i) =>
-        i === index ? { ...card, [field]: nextValue } : card,
-      );
-
-      onChange(JSON.stringify(updated, null, 2));
-    }
-
-    return (
-      <div className="newsletter-card-editor">
-        {cards.map((card, index) => (
-          <fieldset key={card.id ?? index} className="content-key">
-            <legend>Newsletter card {index + 1}</legend>
-
-            {[
-              ["date", "Month and year"],
-              ["category", "Section"],
-              ["title", "Title"],
-              ["subtitle", "Subtitle"],
-              ["alt", "Image alt text"],
-              ["img", "Image URL"],
-              ["readMore", "Read More URL"],
-              ["downloadPdf", "Download PDF URL"],
-            ].map(([field, label]) => (
-              <div className="field" key={field}>
-                <label htmlFor={`newsletter-${index}-${field}`}>{label}</label>
-                <input
-                  id={`newsletter-${index}-${field}`}
-                  type="text"
-                  value={card[field] ?? ""}
-                  onChange={(e) => updateCard(index, field, e.target.value)}
-                />
-              </div>
-            ))}
-
-            <div className="field">
-              <label htmlFor={`newsletter-${index}-desc`}>Description</label>
-              <textarea
-                id={`newsletter-${index}-desc`}
-                rows={4}
-                value={card.desc ?? ""}
-                onChange={(e) => updateCard(index, "desc", e.target.value)}
-              />
-            </div>
-
-            {card.img && (
-              <OptimizedImage
-                src={card.img}
-                alt={card.alt || ""}
-                style={{
-                  display: "block",
-                  maxWidth: 220,
-                  maxHeight: 140,
-                  objectFit: "contain",
-                  marginTop: 8,
-                }}
-               />
-            )}
-          </fieldset>
-        ))}
-      </div>
-    );
-  }
-
-  async function saveKey(key) {
+  async function persistKeyValue(key, rawValue) {
     setJsonError("");
     let value;
-    const rawValue = drafts[key];
-    const trimmedValue = rawValue.trim();
+    const trimmedValue = (rawValue ?? "").trim();
 
     if (trimmedValue.startsWith("{") || trimmedValue.startsWith("[")) {
       try {
         value = JSON.parse(trimmedValue);
       } catch {
         setJsonError(`Invalid JSON for key "${key}". Please check syntax.`);
-        return;
+        return false;
+      }
+
+      if (key === "department.activities" && Array.isArray(value)) {
+        const hasBlankTitle = value.some(
+          (item) => !item || !String(item.title || "").trim(),
+        );
+        if (hasBlankTitle) {
+          setJsonError(
+            "Each Department Activity must have a non-empty Activity Name before saving.",
+          );
+          return false;
+        }
+      }
+
+      if (key === "service-learning.projects" && Array.isArray(value)) {
+        const hasBlankTitle = value.some(
+          (item) => !item || !String(item.title || "").trim(),
+        );
+        if (hasBlankTitle) {
+          setJsonError(
+            "Each Service Learning project must have a Partner / Project Title before saving.",
+          );
+          return false;
+        }
       }
     } else {
-      value = rawValue;
+      value = rawValue ?? "";
     }
 
+    setSavingKey(key);
     try {
       await onErr(
         apiRequest(`/api/content/${encodeURIComponent(key)}`, {
@@ -1516,9 +2195,16 @@ function ContentEditor({ onErr, flashFn, userRole }) {
       );
       flashFn(`Saved "${key}".`);
       await refreshContent();
+      return true;
     } catch {
-      /* handled */
+      return false;
+    } finally {
+      setSavingKey("");
     }
+  }
+
+  async function saveKey(key) {
+    await persistKeyValue(key, drafts[key]);
   }
 
   async function deleteKey(key) {
@@ -1554,15 +2240,25 @@ function ContentEditor({ onErr, flashFn, userRole }) {
       return;
     }
 
+    const defaultValue =
+      key === "department.activities" ||
+      key === "service-learning.projects" ||
+      key === "newsletter.cards" ||
+      key === "newsletter.sidebar"
+        ? []
+        : key === "newsletter.featured"
+          ? { title: "", paragraphs: [], img: "", alt: "" }
+          : "";
+
     setJsonError("");
     try {
       await onErr(
         apiRequest(`/api/content/${encodeURIComponent(key)}`, {
           method: "PUT",
-          body: { value: "" },
+          body: { value: defaultValue },
         }),
       );
-      flashFn(`Key "${newKey}" created.`);
+      flashFn(`Key "${key}" created.`);
       setNewKey("");
       await refreshContent();
     } catch {
@@ -1606,7 +2302,11 @@ function ContentEditor({ onErr, flashFn, userRole }) {
   return (
     <section className="panel">
       <h2>Site content (controls text/data shown on public pages)</h2>
-      {jsonError && <div className="alert error">{jsonError}</div>}
+      {jsonError && (
+        <div className="alert error" role="alert">
+          {jsonError}
+        </div>
+      )}
       {userRole === "SUPER_ADMIN" && (
         <form onSubmit={addKey} className="inline cols">
           <div className="field">
@@ -1630,8 +2330,11 @@ function ContentEditor({ onErr, flashFn, userRole }) {
           <header>
             <code className="keyname">{k}</code>
             <span>
-              <button className="btn btn-sm" onClick={() => saveKey(k)}>
-                Save
+              <button
+                className="btn btn-sm"
+                disabled={savingKey === k}
+                onClick={() => saveKey(k)}>
+                {savingKey === k ? "Saving…" : "Save"}
               </button>{" "}
               <button
                 className="btn btn-danger btn-sm"
@@ -1640,16 +2343,33 @@ function ContentEditor({ onErr, flashFn, userRole }) {
               </button>
             </span>
           </header>
-          {k === "newsletter.cards" ? (
-            <NewsletterCardsEditor
+          {k === "newsletter.cards" || k === "newsletter.sidebar" ? (
+            <NewsletterCollectionSection
+              contentKey={k}
               value={drafts[k] ?? "[]"}
+              itemLabel={
+                k === "newsletter.sidebar" ? "Sidebar Item" : "Newsletter Card"
+              }
+              savingKey={savingKey}
+              onSaveSection={persistKeyValue}
               onChange={(nextValue) =>
                 setDrafts((prev) => ({ ...prev, [k]: nextValue }))
               }
             />
           ) : k === "department.activities" ? (
-            <DepartmentActivitiesEditor
+            <DepartmentActivitiesSection
               value={drafts[k] ?? "[]"}
+              savingKey={savingKey}
+              onSaveSection={persistKeyValue}
+              onChange={(nextValue) =>
+                setDrafts((prev) => ({ ...prev, [k]: nextValue }))
+              }
+            />
+          ) : k === "service-learning.projects" ? (
+            <ServiceLearningProjectsSection
+              value={drafts[k] ?? "[]"}
+              savingKey={savingKey}
+              onSaveSection={persistKeyValue}
               onChange={(nextValue) =>
                 setDrafts((prev) => ({ ...prev, [k]: nextValue }))
               }
