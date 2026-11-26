@@ -32,6 +32,7 @@ const HISTORY_ITEMS = [
     year: "1831",
     highlight: true,
     dataImg: kuriakoseImg,
+    avifImg: kuriakoseImgAvif,
     description: (
       <>
         St Kuriakose Elias Chavara founded the
@@ -54,6 +55,7 @@ const HISTORY_ITEMS = [
   {
     year: "1998",
     dataImg: cmiImg,
+    avifImg: cmiImgAvif,
     isCmi: true,
     description: (
       <>
@@ -66,6 +68,7 @@ const HISTORY_ITEMS = [
   {
     year: "2004",
     dataImg: chclgImg,
+    avifImg: chclgImgAvif,
     isChclg: true,
     description: (
       <>
@@ -102,9 +105,9 @@ export default function AboutUs() {
   const treeImgRef = useRef(null);
   const deerImgRef = useRef(null);
 
-  const [currentImgSrc, setCurrentImgSrc] = useState(
-    "/assets/kuriakose_chavara.png",
-  );
+  const [currentImgSrc, setCurrentImgSrc] = useState(kuriakoseImg);
+  const [currentAvifSrc, setCurrentAvifSrc] = useState(kuriakoseImgAvif);
+  const [imgVariantClass, setImgVariantClass] = useState("");
   const [showTree, setShowTree] = useState(false);
   const [showDeer, setShowDeer] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
@@ -159,6 +162,10 @@ export default function AboutUs() {
 
         if (activeItem.dataImg) {
           setCurrentImgSrc(activeItem.dataImg);
+          setCurrentAvifSrc(activeItem.avifImg ?? "");
+          setImgVariantClass(
+            activeItem.isCmi ? " cmi" : activeItem.isChclg ? " chclg" : "",
+          );
         }
       }
     }
@@ -269,7 +276,8 @@ export default function AboutUs() {
           <div className="history-image">
             <OptimizedImage
               src={currentImgSrc}
-              className={`default-img active${currentImgSrc.includes("cmi") ? " cmi" : ""}${currentImgSrc.includes("chclg") ? " chclg" : ""}`}
+              avifSrc={currentAvifSrc || undefined}
+              className={`default-img active${imgVariantClass}`}
               alt="History step"
               ref={defaultImgRef}
             />
