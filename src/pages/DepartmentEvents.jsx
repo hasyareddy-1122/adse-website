@@ -1,5 +1,6 @@
 import OptimizedImage from "../components/OptimizedImage.jsx";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getApiUrl } from "../lib/api";
 import "./DepartmentEvents.css";
@@ -98,6 +99,8 @@ function DepartmentEvents() {
     const validDate = date && !Number.isNaN(date.getTime());
     const resolvedImg = resolveEventImageUrl(event.imageUrl);
     const timeRange = formatEventTimeRange(event.startTime, event.endTime);
+    const eventPath =
+      event.id != null ? `/event/${event.id}` : "/department-events";
 
     return (
       <StaggerItem key={event.id ?? index}>
@@ -115,21 +118,23 @@ function DepartmentEvents() {
 
           <div className="event-details">
             {resolvedImg && (
-              <OptimizedImage
-                src={resolvedImg}
-                alt={event.title}
-                style={{
-                  width: "100%",
-                  maxHeight: "260px",
-                  objectFit: "cover",
-                  borderRadius: "8px",
-                  marginBottom: "12px",
-                }}
-              />
+              <Link to={eventPath}>
+                <OptimizedImage
+                  src={resolvedImg}
+                  alt={event.title}
+                  style={{
+                    width: "100%",
+                    maxHeight: "260px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                    marginBottom: "12px",
+                  }}
+                />
+              </Link>
             )}
 
             <h3>
-              {event.title}{" "}
+              <Link to={eventPath}>{event.title}</Link>{" "}
               {event.isFeatured && (
                 <span
                   style={{
@@ -166,6 +171,13 @@ function DepartmentEvents() {
               <p>
                 <strong>Venue:</strong> {event.venue}
               </p>
+            )}
+            {event.id != null && (
+              <div style={{ marginTop: "12px" }}>
+                <Link to={eventPath} className="btn btn-outline">
+                  View Event Details →
+                </Link>
+              </div>
             )}
           </div>
         </article>

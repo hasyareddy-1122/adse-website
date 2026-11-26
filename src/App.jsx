@@ -16,6 +16,7 @@ import Register from "./pages/Register";
 import AcceptInvite from "./pages/AcceptInvite";
 import Dashboard from "./pages/Dashboard";
 import DepartmentEvents from "./pages/DepartmentEvents";
+import EventDetail from "./pages/EventDetail";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -110,6 +111,22 @@ function App() {
             element={
               <PageTransition>
                 <DepartmentEvents />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/event/:id"
+            element={
+              <PageTransition>
+                <EventDetail />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/event:id"
+            element={
+              <PageTransition>
+                <EventDetail />
               </PageTransition>
             }
           />
