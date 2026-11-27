@@ -22,14 +22,14 @@
     max-width: 1000px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
 }
 
 .department-events-page .event {
     display: flex;
-    align-items: center;
-    gap: 24px;
-    padding: 22px;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 18px 20px;
     background: #fff;
     border: 1px solid #e5e5e5;
     border-radius: 12px;
@@ -38,14 +38,14 @@
 }
 
 .department-events-page .event:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 .department-events-page .event-date {
     flex-shrink: 0;
-    width: 85px;
-    min-height: 85px;
+    width: 76px;
+    min-height: 76px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -53,35 +53,92 @@
     background: #111;
     color: #fff;
     border-radius: 10px;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
     text-align: center;
 }
 
 .department-events-page .event-date span {
     color: #ccc;
-    font-size: 13px;
-    margin-top: 4px;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.department-events-page .event-thumb-link {
+    flex-shrink: 0;
+    width: 220px;
+    height: 140px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f4f4f5;
+    border: 1px solid #ececec;
+    display: block;
+}
+
+.department-events-page .event-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .department-events-page .event-details {
     flex: 1;
+    min-width: 0;
 }
 
 .department-events-page .event-details h3 {
     color: #171717;
-    font-size: 19px;
-    margin: 0 0 8px;
+    font-size: 18px;
+    margin: 0 0 6px;
+    line-height: 1.35;
 }
 
-.department-events-page .event-details p {
-    color: #666;
+.department-events-page .event-details h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.department-events-page .event-details h3 a:hover {
+    text-decoration: underline;
+}
+
+.department-events-page .event-featured-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background-color: #111;
+    color: #fff;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.department-events-page .event-desc {
+    color: #555;
     font-size: 14px;
-    line-height: 1.6;
-    margin: 5px 0;
+    line-height: 1.55;
+    margin: 4px 0 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-@media (max-width: 600px) {
+.department-events-page .event-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    color: #666;
+    font-size: 13px;
+}
+
+.department-events-page .event-actions {
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
     .department-events-page {
         padding: 35px 5%;
     }
@@ -91,15 +148,24 @@
     }
 
     .department-events-page .event {
-        align-items: flex-start;
-        gap: 15px;
+        flex-wrap: wrap;
+        gap: 14px;
         padding: 15px;
     }
 
     .department-events-page .event-date {
-        width: 68px;
-        min-height: 75px;
+        width: 64px;
+        min-height: 64px;
         font-size: 14px;
+    }
+
+    .department-events-page .event-thumb-link {
+        width: calc(100% - 78px);
+        height: 120px;
+    }
+
+    .department-events-page .event-details {
+        flex-basis: 100%;
     }
 
     .department-events-page .event-details h3 {

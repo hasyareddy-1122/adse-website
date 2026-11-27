@@ -116,64 +116,53 @@ function DepartmentEvents() {
             <span>{validDate ? date.getFullYear() : ""}</span>
           </div>
 
-          <div className="event-details">
-            {resolvedImg && (
-              <Link to={eventPath}>
-                <OptimizedImage
-                  src={resolvedImg}
-                  alt={event.title}
-                  style={{
-                    width: "100%",
-                    maxHeight: "260px",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                    marginBottom: "12px",
-                  }}
-                />
-              </Link>
-            )}
+          {resolvedImg && (
+            <Link to={eventPath} className="event-thumb-link">
+              <OptimizedImage
+                src={resolvedImg}
+                alt={event.title}
+                className="event-thumb"
+              />
+            </Link>
+          )}
 
+          <div className="event-details">
             <h3>
-              <Link to={eventPath}>{event.title}</Link>{" "}
+              <Link to={eventPath}>{event.title}</Link>
               {event.isFeatured && (
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    padding: "2px 8px",
-                    borderRadius: "999px",
-                    backgroundColor: "#111",
-                    color: "#fff",
-                    marginLeft: "8px",
-                    verticalAlign: "middle",
-                  }}>
-                  Featured
-                </span>
+                <span className="event-featured-badge">Featured</span>
               )}
             </h3>
-            <p>{event.description}</p>
-            <p>
-              <strong>Date:</strong>{" "}
-              {validDate
-                ? date.toLocaleDateString("en-US", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })
-                : "To be announced"}
-            </p>
-            {timeRange && (
-              <p>
-                <strong>Time:</strong> {timeRange}
-              </p>
+
+            {event.description && (
+              <p className="event-desc">{event.description}</p>
             )}
-            {event.venue && (
-              <p>
-                <strong>Venue:</strong> {event.venue}
-              </p>
-            )}
+
+            <div className="event-meta">
+              <span>
+                <strong>Date:</strong>{" "}
+                {validDate
+                  ? date.toLocaleDateString("en-US", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : "To be announced"}
+              </span>
+              {timeRange && (
+                <span>
+                  <strong>Time:</strong> {timeRange}
+                </span>
+              )}
+              {event.venue && (
+                <span>
+                  <strong>Venue:</strong> {event.venue}
+                </span>
+              )}
+            </div>
+
             {event.id != null && (
-              <div style={{ marginTop: "12px" }}>
+              <div className="event-actions">
                 <Link to={eventPath} className="btn btn-outline">
                   View Event Details →
                 </Link>
