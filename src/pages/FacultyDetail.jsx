@@ -146,30 +146,10 @@ export default function FacultyDetail() {
                 </p>
               )}
 
-              {(faculty.cabinLocation || faculty.locationRestricted) && (
+              {faculty.cabinLocation && (
                 <p>
                   <strong>Campus / Cabin Location:</strong>{" "}
-                  {faculty.cabinLocation || "Kengeri Campus"}
-                  {faculty.locationRestricted && (
-                    <span
-                      style={{
-                        display: "block",
-                        fontSize: "0.9rem",
-                        color: "#555",
-                        marginTop: "4px",
-                      }}>
-                      <Link
-                        to="/login"
-                        style={{
-                          textDecoration: "underline",
-                          fontWeight: 600,
-                        }}>
-                        Sign in
-                      </Link>{" "}
-                      with your university account to view exact cabin / room
-                      details.
-                    </span>
-                  )}
+                  {faculty.cabinLocation}
                 </p>
               )}
 

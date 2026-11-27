@@ -1,11 +1,17 @@
 import { motion, useScroll, useSpring } from "framer-motion";
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1];
+const SMOOTH_SPRING = {
+  type: "spring",
+  stiffness: 340,
+  damping: 28,
+  mass: 0.85,
+};
 const TACTILE_SPRING = {
   type: "spring",
-  stiffness: 420,
-  damping: 30,
-  mass: 0.8,
+  stiffness: 440,
+  damping: 26,
+  mass: 0.75,
 };
 
 /**
@@ -14,10 +20,10 @@ const TACTILE_SPRING = {
 export function PageTransition({ children }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.32, ease: EASE_OUT_EXPO }}>
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.36, ease: EASE_OUT_EXPO }}>
       {children}
     </motion.div>
   );
@@ -30,17 +36,17 @@ export function ScrollReveal({
   children,
   className,
   delay = 0,
-  y = 22,
-  scale = 1,
+  y = 24,
+  scale = 0.985,
   once = true,
 }) {
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y, scale: scale === 1 ? 1 : scale }}
+      initial={{ opacity: 0, y, scale }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once, amount: "some" }}
-      transition={{ duration: 0.48, delay, ease: EASE_OUT_EXPO }}>
+      transition={{ duration: 0.55, delay, ease: EASE_OUT_EXPO }}>
       {children}
     </motion.div>
   );
@@ -49,7 +55,7 @@ export function ScrollReveal({
 /**
  * Container for staggered card grids (faculty, events, features, programs).
  */
-export function StaggerGrid({ children, className, stagger = 0.06 }) {
+export function StaggerGrid({ children, className, stagger = 0.055 }) {
   return (
     <motion.div
       className={className}
@@ -59,7 +65,7 @@ export function StaggerGrid({ children, className, stagger = 0.06 }) {
       variants={{
         hidden: {},
         visible: {
-          transition: { staggerChildren: stagger, delayChildren: 0.04 },
+          transition: { staggerChildren: stagger, delayChildren: 0.03 },
         },
       }}>
       {children}
@@ -68,25 +74,47 @@ export function StaggerGrid({ children, className, stagger = 0.06 }) {
 }
 
 /**
- * Individual card item inside a StaggerGrid with hover lift & tap feedback.
+ * Individual card item inside a StaggerGrid with Pinterest-style spring lift & tap feedback.
  */
 export function StaggerItem({ children, className }) {
   return (
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, y: 18 },
+        hidden: { opacity: 0, y: 20, scale: 0.98 },
         visible: {
           opacity: 1,
           y: 0,
-          transition: { duration: 0.4, ease: EASE_OUT_EXPO },
+          scale: 1,
+          transition: { duration: 0.44, ease: EASE_OUT_EXPO },
         },
       }}
       whileHover={{
-        y: -4,
-        transition: { duration: 0.18, ease: EASE_OUT_EXPO },
+        y: -6,
+        scale: 1.012,
+        transition: SMOOTH_SPRING,
       }}
-      whileTap={{ scale: 0.99, transition: TACTILE_SPRING }}>
+      whileTap={{ scale: 0.988, transition: TACTILE_SPRING }}>
+      {children}
+    </motion.div>
+  );
+}
+
+/**
+ * Standalone interactive card wrapper with tactile hover & press physics.
+ */
+export function InteractiveCard({ children, className, onClick, ...props }) {
+  return (
+    <motion.div
+      className={className}
+      onClick={onClick}
+      whileHover={{
+        y: -6,
+        scale: 1.01,
+        transition: SMOOTH_SPRING,
+      }}
+      whileTap={{ scale: 0.985, transition: TACTILE_SPRING }}
+      {...props}>
       {children}
     </motion.div>
   );
@@ -101,10 +129,11 @@ export function MotionButton({ children, className, ...props }) {
       className={className}
       style={{ display: "inline-block" }}
       whileHover={{
-        y: -1,
-        transition: { duration: 0.15, ease: EASE_OUT_EXPO },
+        y: -2,
+        scale: 1.02,
+        transition: SMOOTH_SPRING,
       }}
-      whileTap={{ scale: 0.97, transition: TACTILE_SPRING }}
+      whileTap={{ scale: 0.96, transition: TACTILE_SPRING }}
       {...props}>
       {children}
     </motion.div>
@@ -112,9 +141,9 @@ export function MotionButton({ children, className, ...props }) {
 }
 
 /**
- * Optional top reading/scroll progress bar for long pages.
+ * Top reading/scroll progress bar for long pages.
  */
-export function ScrollProgressBar({ color = "#002147", height = 3 }) {
+export function ScrollProgressBar({ color = "#0077cc", height = 3 }) {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 260,

@@ -11,11 +11,13 @@ const NAV_ITEMS = [
   { to: "/service-learning", label: "Service Learning" },
 ];
 
+const ADMIN_ROLES = new Set(["SUPER_ADMIN", "ADMIN"]);
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
-  const loggedIn = isLoggedIn();
   const user = getStoredUser();
+  const isAdminSession = isLoggedIn() && user && ADMIN_ROLES.has(user.role);
 
   const linkClass = ({ isActive }) => (isActive ? "active" : undefined);
 
@@ -67,7 +69,7 @@ export default function Navbar() {
                   {item.label}
                 </NavLink>
               ))}
-              {loggedIn ? (
+              {isAdminSession && (
                 <>
                   <NavLink
                     to="/dashboard"
@@ -77,17 +79,13 @@ export default function Navbar() {
                     Dashboard
                   </NavLink>
                   <a
-                    href="/login"
+                    href="/"
                     className="account-logout"
                     onClick={handleLogoutClick}
-                    title={user ? `Signed in as ${user.email}` : undefined}>
+                    title={`Signed in as ${user.email}`}>
                     Logout
                   </a>
                 </>
-              ) : (
-                <Link to="/login" className="account-link">
-                  Login
-                </Link>
               )}
             </nav>
           </div>
@@ -123,7 +121,7 @@ export default function Navbar() {
           </NavLink>
         ))}
 
-        {loggedIn ? (
+        {isAdminSession && (
           <>
             <NavLink
               to="/dashboard"
@@ -138,13 +136,6 @@ export default function Navbar() {
               Logout
             </a>
           </>
-        ) : (
-          <Link
-            to="/login"
-            className="account-link"
-            onClick={() => setMenuOpen(false)}>
-            Login
-          </Link>
         )}
       </nav>
     </header>

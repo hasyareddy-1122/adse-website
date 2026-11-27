@@ -1,22 +1,23 @@
 import OptimizedImage from "../components/OptimizedImage.jsx";
-/* Role-adaptive dashboard.
--  STUDENT     → own status tracking (read-only)
--  FACULTY     → own profile editor
--  ADMIN (HOD) → invite/remove faculties, manage users, directory,
+/* Role-adaptive admin dashboard.
+-  ADMIN (HOD) → manage admin invites, users, directory,
 -                newsletter, service-learning & department activities
--  SUPER_ADMIN → everything above + full event management + site content editor + admin invites */
+-  SUPER_ADMIN → everything above + full event management + site content editor */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   apiRequest,
   getStoredUser,
   isLoggedIn,
+  logout,
   ROLE_LABELS,
   fmtDate,
   getApiUrl,
 } from "../lib/api.js";
 import Navbar from "../components/Navbar.jsx";
 import "./Dashboard.css";
+
+const ALLOWED_ADMIN_ROLES = new Set(["SUPER_ADMIN", "ADMIN"]);
 
 const EMPTY_FACULTY_PROFILE = {
   name: "",
@@ -109,232 +110,14 @@ function parseJsonArraySafe(raw) {
   }
 }
 
-/* ─── STUDENT ─────────────────────────────────────────────────────────────── */
-
-function StudentStatuses({ onErr }) {
-  const [statuses, setStatuses] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const loadStatuses = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const d = await onErr(apiRequest("/api/statuses"));
-      setStatuses(d.statuses ?? []);
-    } catch (err) {
-      setError(err?.message || "Failed to load status records.");
-    } finally {
-      setLoading(false);
-    }
-  }, [onErr]);
-
-  useEffect(() => {
-    loadStatuses();
-  }, [loadStatuses]);
-
-  return (
-    <section className="panel">
-      <h2>My statuses</h2>
-      {loading ? (
-        <p className="empty">Loading…</p>
-      ) : error ? (
-        <div>
-          <div className="alert error" role="alert">
-            {error}
-          </div>
-          <button type="button" className="btn" onClick={loadStatuses}>
-            Retry
-          </button>
-        </div>
-      ) : statuses.length === 0 ? (
-        <p className="empty">
-          No status entries yet. Your department will add items here.
-        </p>
-      ) : (
-        <table className="data">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Status</th>
-              <th>Remark</th>
-              <th>Last updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {statuses.map((s) => (
-              <tr key={s.id}>
-                <td>{s.title}</td>
-                <td>
-                  <span className={`pill pill-${s.status}`}>
-                    {s.status ? String(s.status).replaceAll("_", " ") : ""}
-                  </span>
-                </td>
-                <td>{s.remark || "—"}</td>
-                <td className="muted">{fmtDate(s.updatedAt)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </section>
-  );
-}
-
-/* ─── FACULTY: My Profile ────────────────────────────────────────────────── */
-
-function FacultyProfileEditor({ onErr, flashFn }) {
-  const [profile, setProfile] = useState(EMPTY_FACULTY_PROFILE);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  const updateField = (e) => {
-    setProfile((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const loadProfile = useCallback(async () => {
-    setLoading(true);
-    setLoadError("");
-
-    try {
-      const data = await apiRequest("/api/faculties/me");
-
-      if (!data?.faculty) {
-        throw new Error(
-          "The server did not return a faculty profile. Please try again.",
-        );
-      }
-
-      setProfile({ ...EMPTY_FACULTY_PROFILE, ...data.faculty });
-    } catch (err) {
-      setLoadError(
-        err?.message ||
-          "Unable to load your faculty profile. Please try again.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
-
-  async function saveProfile(e) {
-    e.preventDefault();
-
-    if (loading || loadError) return;
-
-    setSaving(true);
-
-    try {
-      const data = await onErr(
-        apiRequest("/api/faculties/me", {
-          method: "PUT",
-          body: profile,
-        }),
-      );
-
-      if (!data?.faculty) {
-        throw new Error("The server did not return the updated profile.");
-      }
-
-      setProfile({ ...EMPTY_FACULTY_PROFILE, ...data.faculty });
-      flashFn("Your faculty profile has been updated.");
-    } catch {
-      // Shared error handler displays API errors.
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  if (loading) {
-    return (
-      <section className="panel">
-        <h2>My Faculty Profile</h2>
-        <p className="empty">Loading profile…</p>
-      </section>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <section className="panel">
-        <h2>My Faculty Profile</h2>
-        <div className="alert error" role="alert">
-          {loadError}
-        </div>
-        <button
-          type="button"
-          className="btn"
-          onClick={loadProfile}
-          disabled={loading}>
-          Retry
-        </button>
-      </section>
-    );
-  }
-
-  const fields = [
-    ["name", "Full name"],
-    ["designation", "Designation"],
-    ["qualification", "Qualifications"],
-    ["image", "Profile image URL"],
-    ["publicEmail", "Public academic email"],
-    ["cabinLocation", "Cabin / office location"],
-    ["researchGate", "ResearchGate URL"],
-    ["googleScholar", "Google Scholar URL"],
-    ["orcid", "ORCID URL or identifier"],
-    ["website", "Personal / academic website"],
-  ];
-
-  return (
-    <section className="panel">
-      <h2>My Faculty Profile</h2>
-      <p className="muted">
-        Update the details displayed on your public faculty profile.
-      </p>
-
-      <form onSubmit={saveProfile} className="inline">
-        <div className="grid-2">
-          {fields.map(([name, label]) => (
-            <div className="field" key={name}>
-              <label htmlFor={`faculty-my-${name}`}>{label}</label>
-              <input
-                id={`faculty-my-${name}`}
-                name={name}
-                value={profile[name] ?? ""}
-                onChange={updateField}
-                type={name === "publicEmail" ? "email" : "text"}
-                maxLength={500}
-              />
-            </div>
-          ))}
-        </div>
-
-        <button
-          type="submit"
-          className="btn"
-          disabled={saving || loading || Boolean(loadError)}>
-          {saving ? "Saving…" : "Save Profile"}
-        </button>
-      </form>
-    </section>
-  );
-}
-
-/* ─── STAFF: Invitations ──────────────────────────────────────────────────── */
+/* ─── ADMIN: Invitations ──────────────────────────────────────────────────── */
 
 function InvitationsPanel({ user, onErr, flashFn }) {
   const [invites, setInvites] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
-  const [form, setForm] = useState({ name: "", email: "", role: "FACULTY" });
+  const [form, setForm] = useState({ name: "", email: "", role: "ADMIN" });
   const [resultUrl, setResultUrl] = useState("");
   const [formError, setFormError] = useState("");
   const [sendingInvite, setSendingInvite] = useState(false);
@@ -375,7 +158,7 @@ function InvitationsPanel({ user, onErr, flashFn }) {
 
       setResultUrl(new URL(data.inviteUrl, window.location.href).href);
       flashFn(`Invitation created for ${data.invitation.email}.`);
-      setForm({ name: "", email: "", role: "FACULTY" });
+      setForm({ name: "", email: "", role: "ADMIN" });
       await refreshInvites();
     } catch (err) {
       setFormError(err?.message || "Failed to create invitation.");
@@ -397,11 +180,11 @@ function InvitationsPanel({ user, onErr, flashFn }) {
 
   return (
     <section className="panel">
-      <h2>Add / remove faculties (email invitation)</h2>
+      <h2>Administrator Invitations</h2>
       {formError && <div className="alert error">{formError}</div>}
       {resultUrl && (
         <div className="alert ok">
-          Share this link (also emailed/logged):
+          Share this invitation link:
           <br />
           <input
             type="text"
@@ -430,7 +213,7 @@ function InvitationsPanel({ user, onErr, flashFn }) {
             id="invite-email"
             type="email"
             required
-            placeholder="jane@christ.example.com"
+            placeholder="admin@christuniversity.in"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
@@ -441,9 +224,9 @@ function InvitationsPanel({ user, onErr, flashFn }) {
             id="invite-role"
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value })}>
-            <option value="FACULTY">Faculty</option>
+            <option value="ADMIN">Admin</option>
             {user.role === "SUPER_ADMIN" && (
-              <option value="ADMIN">Admin (HOD)</option>
+              <option value="SUPER_ADMIN">Super Admin</option>
             )}
           </select>
         </div>
@@ -483,7 +266,7 @@ function InvitationsPanel({ user, onErr, flashFn }) {
                   <br />
                   <span className="muted">{i.name}</span>
                 </td>
-                <td>{i.role}</td>
+                <td>{ROLE_LABELS[i.role] || i.role}</td>
                 <td className="muted">{fmtDate(i.expiresAt)}</td>
                 <td className="actions">
                   <button
@@ -501,7 +284,7 @@ function InvitationsPanel({ user, onErr, flashFn }) {
   );
 }
 
-/* ─── STAFF: Users ────────────────────────────────────────────────────────── */
+/* ─── ADMIN: Users ────────────────────────────────────────────────────────── */
 
 function UsersPanel({ user, onErr, flashFn }) {
   const [users, setUsers] = useState(null);
@@ -513,7 +296,10 @@ function UsersPanel({ user, onErr, flashFn }) {
     setLoadError("");
     try {
       const d = await onErr(apiRequest("/api/users"));
-      setUsers(d.users);
+      const adminUsers = (d.users ?? []).filter((u) =>
+        ALLOWED_ADMIN_ROLES.has(u.role),
+      );
+      setUsers(adminUsers);
     } catch (err) {
       setLoadError(err?.message || "Failed to load user accounts.");
     } finally {
@@ -543,7 +329,7 @@ function UsersPanel({ user, onErr, flashFn }) {
   async function remove(u) {
     if (
       !confirm(
-        "Remove this account? If they have dependent records it will be deactivated instead of deleted.",
+        "Remove this administrator account? If they have dependent records it will be deactivated instead of deleted.",
       )
     )
       return;
@@ -561,7 +347,7 @@ function UsersPanel({ user, onErr, flashFn }) {
   if (loading)
     return (
       <section className="panel">
-        <h2>User accounts</h2>
+        <h2>Administrator accounts</h2>
         <p className="empty">Loading…</p>
       </section>
     );
@@ -569,7 +355,7 @@ function UsersPanel({ user, onErr, flashFn }) {
   if (loadError)
     return (
       <section className="panel">
-        <h2>User accounts</h2>
+        <h2>Administrator accounts</h2>
         <div className="alert error">{loadError}</div>
         <button type="button" className="btn" onClick={refreshUsers}>
           Retry
@@ -579,7 +365,7 @@ function UsersPanel({ user, onErr, flashFn }) {
 
   return (
     <section className="panel">
-      <h2>User accounts</h2>
+      <h2>Administrator accounts</h2>
       <table className="data">
         <thead>
           <tr>
@@ -628,7 +414,7 @@ function UsersPanel({ user, onErr, flashFn }) {
   );
 }
 
-/* ─── STAFF: Faculty Directory ────────────────────────────────────────────── */
+/* ─── ADMIN: Faculty Directory ────────────────────────────────────────────── */
 
 function DirectoryPanel({ onErr, flashFn }) {
   const [faculties, setFaculties] = useState(null);
@@ -776,7 +562,7 @@ function DirectoryPanel({ onErr, flashFn }) {
           <tr>
             <th>Name</th>
             <th>Designation</th>
-            <th>Account</th>
+            <th>Cabin Location</th>
             <th></th>
           </tr>
         </thead>
@@ -796,13 +582,7 @@ function DirectoryPanel({ onErr, flashFn }) {
 
               <td>{f.designation || "—"}</td>
 
-              <td>
-                {f.hasAccount ? (
-                  <span className="pill pill-APPROVED">Linked</span>
-                ) : (
-                  <span className="muted">—</span>
-                )}
-              </td>
+              <td>{f.cabinLocation || "—"}</td>
 
               <td className="actions">
                 <button
@@ -1030,7 +810,7 @@ function EventsManagementPanel({ onErr, flashFn }) {
 
   return (
     <section className="panel">
-      <h2>Department Event Management (Super Admin)</h2>
+      <h2>Department Event Management</h2>
       <p className="muted">
         Create, schedule, publish, feature, and manage all department events.
         Only published events appear on the public website.
@@ -1139,7 +919,7 @@ function EventsManagementPanel({ onErr, flashFn }) {
               id="ev-image-url"
               type="text"
               disabled={saving || uploadingImage}
-              placeholder="/api/events/images/... or https://..."
+              placeholder="/images/events/... or https://..."
               value={form.imageUrl}
               onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
             />
@@ -1154,7 +934,7 @@ function EventsManagementPanel({ onErr, flashFn }) {
               style={{
                 maxWidth: 260,
                 maxHeight: 150,
-                objectFit: "cover",
+                objectFit: "contain",
                 borderRadius: 6,
                 border: "1px solid #d4d4d4",
               }}
@@ -1324,7 +1104,7 @@ function EventsManagementPanel({ onErr, flashFn }) {
   );
 }
 
-/* ─── SUPER ADMIN / HOD: Content Editor ──────────────────────────────────── */
+/* ─── ADMIN / SUPER ADMIN: Content Editor ─────────────────────────────────── */
 
 function DepartmentActivitiesSection({
   value,
@@ -1670,7 +1450,7 @@ function ServiceLearningProjectsSection({
             <input
               id="sl-form-image"
               type="text"
-              placeholder="/assets/service1.avif or https://..."
+              placeholder="/images/service-learning/sl-media-02.avif or https://..."
               value={form.image}
               onChange={(e) => setForm({ ...form, image: e.target.value })}
             />
@@ -2235,7 +2015,7 @@ function ContentEditor({ onErr, flashFn, userRole }) {
       !key.startsWith("department.activities")
     ) {
       setJsonError(
-        "HoD can create only newsletter.*, service-learning.*, and department.activities* keys.",
+        "Admins can create only newsletter.*, service-learning.*, and department.activities* keys.",
       );
       return;
     }
@@ -2431,13 +2211,24 @@ export default function Dashboard() {
   const userRole = user?.role;
 
   useEffect(() => {
-    if (!isLoggedIn() || !userId) {
-      navigate("/login");
+    if (!isLoggedIn() || !userId || !ALLOWED_ADMIN_ROLES.has(userRole)) {
+      logout();
+      navigate("/", { replace: true });
       return;
     }
     apiRequest("/api/auth/me")
-      .then(() => setReady(true))
-      .catch(() => navigate("/login"));
+      .then((data) => {
+        if (!data?.user || !ALLOWED_ADMIN_ROLES.has(data.user.role)) {
+          logout();
+          navigate("/", { replace: true });
+          return;
+        }
+        setReady(true);
+      })
+      .catch(() => {
+        logout();
+        navigate("/", { replace: true });
+      });
   }, [navigate, userId, userRole]);
 
   const flashFn = useCallback((text, ok = true) => {
@@ -2464,26 +2255,23 @@ export default function Dashboard() {
     [flashFn],
   );
 
-  if (!ready || !user) return null;
+  if (!ready || !user || !ALLOWED_ADMIN_ROLES.has(user.role)) return null;
 
-  const isStaff = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
+  const isAdmin = ALLOWED_ADMIN_ROLES.has(user.role);
 
   return (
     <div className="dash-shell">
       <Navbar />
       <main className="wrap">
-        <h1 className="page-title">{ROLE_LABELS[user.role]} workspace</h1>
+        <h1 className="page-title">
+          {user.role === "SUPER_ADMIN"
+            ? "Super Admin Workspace"
+            : "Department Admin Workspace"}
+        </h1>
         <p className="page-sub">
-          {
-            {
-              SUPER_ADMIN:
-                "Full control over site data, events, users and content.",
-              ADMIN:
-                "Manage faculties via email invitations, directory, newsletter, service-learning and department activities.",
-              FACULTY: "Manage your public faculty profile.",
-              STUDENT: "Track your application and project statuses.",
-            }[user.role]
-          }
+          {user.role === "SUPER_ADMIN"
+            ? "Full administrative control over department events, directory, users, and site content."
+            : "Manage department faculty directory, newsletter, service-learning, and department activities."}
         </p>
         {flashMsg && (
           <div className={`alert ${flashMsg.ok ? "ok" : "error"}`}>
@@ -2491,21 +2279,17 @@ export default function Dashboard() {
           </div>
         )}
 
-        {user.role === "STUDENT" && <StudentStatuses onErr={onErr} />}
-        {user.role === "FACULTY" && (
-          <FacultyProfileEditor onErr={onErr} flashFn={flashFn} />
-        )}
-        {isStaff && (
+        {isAdmin && (
           <InvitationsPanel user={user} onErr={onErr} flashFn={flashFn} />
         )}
-        {isStaff && <UsersPanel user={user} onErr={onErr} flashFn={flashFn} />}
-        {isStaff && <DirectoryPanel onErr={onErr} flashFn={flashFn} />}
+        {isAdmin && <UsersPanel user={user} onErr={onErr} flashFn={flashFn} />}
+        {isAdmin && <DirectoryPanel onErr={onErr} flashFn={flashFn} />}
 
         {user.role === "SUPER_ADMIN" && (
           <EventsManagementPanel onErr={onErr} flashFn={flashFn} />
         )}
 
-        {(user.role === "SUPER_ADMIN" || user.role === "ADMIN") && (
+        {isAdmin && (
           <ContentEditor onErr={onErr} flashFn={flashFn} userRole={user.role} />
         )}
       </main>

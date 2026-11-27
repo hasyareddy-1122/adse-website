@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import prisma from './db.js';
 
-export const ROLES = ['SUPER_ADMIN', 'ADMIN', 'FACULTY', 'STUDENT'];
-export const ROLE_RANK = { STUDENT: 0, FACULTY: 1, ADMIN: 2, SUPER_ADMIN: 3 };
+export const ROLES = ['SUPER_ADMIN', 'ADMIN'];
+export const ROLE_RANK = { ADMIN: 1, SUPER_ADMIN: 2 };
 
 export function signToken(user) {
   return jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET, {
@@ -27,8 +27,8 @@ export async function authenticate(req, res, next) {
       return res.status(401).json({ error: 'Invalid or expired token' });
     }
     const user = await prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user || !user.isActive) {
-      return res.status(401).json({ error: 'Account is inactive or no longer exists' });
+    if (!user || !user.isActive || !ROLES.includes(user.role)) {
+      return res.status(401).json({ error: 'Account is inactive or unauthorized' });
     }
     req.user = user;
     next();
@@ -57,7 +57,7 @@ export function requireRole(...roles) {
 export function requireMinRole(role) {
   return (req, res, next) => {
     if (!req.user) return res.status(401).json({ error: 'Login required' });
-    if (ROLE_RANK[req.user.role] < ROLE_RANK[role]) {
+    if ((ROLE_RANK[req.user.role] ?? 0) < (ROLE_RANK[role] ?? 99)) {
       return res.status(403).json({ error: `Forbidden — requires ${role} or above` });
     }
     next();

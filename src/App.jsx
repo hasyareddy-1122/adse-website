@@ -1,7 +1,8 @@
-import { useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence, MotionConfig } from "framer-motion";
 import { PageTransition } from "./components/MotionPrimitives";
+import { apiRequest, getStoredUser, isLoggedIn, logout } from "./lib/api.js";
 import Home from "./pages/Home";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
@@ -12,11 +13,12 @@ import IndustrialVisit from "./pages/IndustrialVisit";
 import ServiceLearning from "./pages/ServiceLearning";
 import FacultyDetail from "./pages/FacultyDetail";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import AcceptInvite from "./pages/AcceptInvite";
 import Dashboard from "./pages/Dashboard";
 import DepartmentEvents from "./pages/DepartmentEvents";
 import EventDetail from "./pages/EventDetail";
+
+const ALLOWED_ADMIN_ROLES = new Set(["SUPER_ADMIN", "ADMIN"]);
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -24,6 +26,55 @@ function ScrollToTop() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [pathname]);
   return null;
+}
+
+function ProtectedAdminRoute({ children }) {
+  const [status, setStatus] = useState("checking");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function verifySession() {
+      const storedUser = getStoredUser();
+      if (
+        !isLoggedIn() ||
+        !storedUser ||
+        !ALLOWED_ADMIN_ROLES.has(storedUser.role)
+      ) {
+        logout();
+        if (!cancelled) setStatus("denied");
+        return;
+      }
+
+      try {
+        const data = await apiRequest("/api/auth/me");
+        if (!data?.user || !ALLOWED_ADMIN_ROLES.has(data.user.role)) {
+          logout();
+          if (!cancelled) setStatus("denied");
+          return;
+        }
+        if (!cancelled) setStatus("allowed");
+      } catch {
+        logout();
+        if (!cancelled) setStatus("denied");
+      }
+    }
+
+    verifySession();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (status === "checking") {
+    return null;
+  }
+
+  if (status === "denied") {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 }
 
 function App() {
@@ -131,7 +182,7 @@ function App() {
             }
           />
 
-          {/* Auth + portal */}
+          {/* Private Admin Auth + Protected Dashboard */}
           <Route
             path="/login"
             element={
@@ -140,14 +191,7 @@ function App() {
               </PageTransition>
             }
           />
-          <Route
-            path="/register"
-            element={
-              <PageTransition>
-                <Register />
-              </PageTransition>
-            }
-          />
+          <Route path="/register" element={<Navigate to="/" replace />} />
           <Route
             path="/accept-invite"
             element={
@@ -159,9 +203,11 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <PageTransition>
-                <Dashboard />
-              </PageTransition>
+              <ProtectedAdminRoute>
+                <PageTransition>
+                  <Dashboard />
+                </PageTransition>
+              </ProtectedAdminRoute>
             }
           />
         </Routes>

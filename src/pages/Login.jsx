@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { apiRequest, saveSession, isLoggedIn } from "../lib/api.js";
+import { useNavigate } from "react-router-dom";
+import {
+  apiRequest,
+  saveSession,
+  isLoggedIn,
+  getStoredUser,
+  logout,
+} from "../lib/api.js";
 import Navbar from "../components/Navbar.jsx";
 import "./Auth.css";
+
+const ALLOWED_ROLES = new Set(["SUPER_ADMIN", "ADMIN"]);
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,7 +21,8 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (isLoggedIn()) {
+    const existingUser = getStoredUser();
+    if (isLoggedIn() && existingUser && ALLOWED_ROLES.has(existingUser.role)) {
       navigate("/dashboard", { replace: true });
     }
   }, [navigate]);
@@ -35,6 +44,13 @@ export default function Login() {
         },
       });
 
+      if (!data?.user || !ALLOWED_ROLES.has(data.user.role)) {
+        logout();
+        setError("Access restricted to authorized department administrators.");
+        setBusy(false);
+        return;
+      }
+
       saveSession(data.token, data.user);
       navigate("/dashboard", { replace: true });
     } catch (err) {
@@ -49,8 +65,11 @@ export default function Login() {
 
       <main className="auth-main">
         <div className="card">
-          <h1>Sign in</h1>
-          <p className="sub">Faculty, HOD and student portal access.</p>
+          <h1>Department Admin Portal</h1>
+          <p className="sub">
+            Restricted access for Head of Department and authorized
+            administrators.
+          </p>
 
           {error && <div className="alert error">{error}</div>}
 
@@ -62,7 +81,7 @@ export default function Login() {
                 id="email"
                 autoComplete="username"
                 required
-                placeholder="you@example.com"
+                placeholder="admin@christuniversity.in"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -85,45 +104,6 @@ export default function Login() {
               {busy ? "Signing in..." : "Sign in"}
             </button>
           </form>
-
-          <p className="alt-row">
-            New student? <Link to="/register">Create a student account</Link>
-            <br />
-            Received an invite?{" "}
-            <Link to="/accept-invite">Accept your invitation</Link>
-          </p>
-
-          <details className="demo-details">
-            <summary>Demo accounts (dev only)</summary>
-            <table>
-              <tbody>
-                <tr>
-                  <td>Super admin</td>
-                  <td>
-                    <code>superadmin@adse.local</code>
-                  </td>
-                </tr>
-                <tr>
-                  <td>HOD (admin)</td>
-                  <td>
-                    <code>hod@christ.example.com</code>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Faculty</td>
-                  <td>
-                    <code>faculty@christ.example.com</code>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Student</td>
-                  <td>
-                    <code>student@christ.example.com</code>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </details>
         </div>
       </main>
     </div>
