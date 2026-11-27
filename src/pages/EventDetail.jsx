@@ -129,21 +129,36 @@ export default function EventDetail() {
         ) : (
           <motion.article
             className="event-details"
+            style={{ maxWidth: "900px" }}
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: HERO_EASE }}>
             {resolvedImg && (
-              <OptimizedImage
-                src={resolvedImg}
-                alt={event.title}
+              <div
                 style={{
-                  width: "100%",
-                  maxHeight: "460px",
-                  objectFit: "cover",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#f8f9fa",
+                  border: "1px solid #e5e7eb",
                   borderRadius: "12px",
-                  marginBottom: "20px",
-                }}
-              />
+                  padding: "16px",
+                  marginBottom: "24px",
+                }}>
+                <OptimizedImage
+                  src={resolvedImg}
+                  alt={event.title}
+                  style={{
+                    width: "auto",
+                    maxWidth: "100%",
+                    maxHeight: "650px",
+                    height: "auto",
+                    objectFit: "contain",
+                    borderRadius: "8px",
+                    display: "block",
+                  }}
+                />
+              </div>
             )}
 
             <h1>
