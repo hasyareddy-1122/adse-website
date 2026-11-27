@@ -63,12 +63,8 @@ export default function FacultyDetail() {
     };
   }, [id]);
 
-  const academicLinks = [
-    { label: "ResearchGate", url: faculty?.researchGate },
-    { label: "Google Scholar", url: faculty?.googleScholar },
-    { label: "ORCID", url: faculty?.orcid },
-    { label: "Website", url: faculty?.website },
-  ].filter((item) => typeof item.url === "string" && item.url.trim());
+  const hasGoogleScholar =
+    typeof faculty?.googleScholar === "string" && faculty.googleScholar.trim();
 
   return (
     <div className="fd-page">
@@ -111,20 +107,7 @@ export default function FacultyDetail() {
               )}
 
               <h2>{faculty.name}</h2>
-
               {faculty.designation && <p>{faculty.designation}</p>}
-
-              {faculty.department && (
-                <p>
-                  <strong>Department:</strong> {faculty.department}
-                </p>
-              )}
-
-              {faculty.specialization && (
-                <p>
-                  <strong>Specialization:</strong> {faculty.specialization}
-                </p>
-              )}
             </div>
 
             <div className="fd-faculty-right">
@@ -136,21 +119,15 @@ export default function FacultyDetail() {
                 </p>
               )}
 
-              {faculty.specialization && (
-                <p>
-                  <strong>Specialization:</strong> {faculty.specialization}
-                </p>
-              )}
-
               {faculty.department && (
                 <p>
                   <strong>Department:</strong> {faculty.department}
                 </p>
               )}
 
-              {faculty.cabinLocation && (
+              {faculty.specialization && (
                 <p>
-                  <strong>Cabin Location:</strong> {faculty.cabinLocation}
+                  <strong>Specialization:</strong> {faculty.specialization}
                 </p>
               )}
 
@@ -160,9 +137,9 @@ export default function FacultyDetail() {
                 </p>
               )}
 
-              {faculty.bio && (
+              {faculty.cabinLocation && (
                 <p>
-                  <strong>About:</strong> {faculty.bio}
+                  <strong>Cabin Location:</strong> {faculty.cabinLocation}
                 </p>
               )}
 
@@ -175,17 +152,14 @@ export default function FacultyDetail() {
                 </p>
               )}
 
-              {academicLinks.length > 0 && (
+              {hasGoogleScholar && (
                 <div className="fd-btns">
-                  {academicLinks.map((item) => (
-                    <a
-                      key={item.label}
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer">
-                      {item.label}
-                    </a>
-                  ))}
+                  <a
+                    href={faculty.googleScholar}
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    Google Scholar
+                  </a>
                 </div>
               )}
             </div>

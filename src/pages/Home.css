@@ -282,8 +282,24 @@
 .view-all:hover { background: var(--text-heading); color: var(--bg-white); }
 
 /* Faculty Section */
-#faculty { padding: 60px var(--pad-x-mobile); text-align: center; background: var(--bg-off-white); }
-#faculty > h1 { font-size: 70px; color: #222; margin-bottom: 20px; font-family: var(--font-display); }
+#faculty {
+  padding: 60px var(--pad-x-mobile);
+  text-align: center;
+  background: var(--bg-off-white);
+  color: var(--text-heading);
+}
+
+#faculty>h1 {
+  font-size: 70px;
+  color: var(--text-heading);
+  margin-bottom: 20px;
+  font-family: var(--font-display);
+}
+
+#faculty p {
+  color: var(--text-muted);
+}
+
 .faculty-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 20px; }
 .faculty-card { background: var(--bg-white); padding: 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-md); text-align: center; transition: transform var(--transition), box-shadow var(--transition); }
 .faculty-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
