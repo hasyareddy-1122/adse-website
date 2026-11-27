@@ -25,6 +25,7 @@ export default function ServiceLearning() {
   const [currentPage, setCurrentPage] = useState(1);
   const [savedProjects, setSavedProjects] = useState(null);
   const [projectsLoading, setProjectsLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState(null);
   const itemsPerPage = 16;
 
   useEffect(() => {
@@ -61,6 +62,19 @@ export default function ServiceLearning() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!selectedProject) return;
+
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        setSelectedProject(null);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedProject]);
 
   const displayProjects = savedProjects ?? [];
 
@@ -203,7 +217,17 @@ export default function ServiceLearning() {
               {paginatedList.map((project, idx) => (
                 <StaggerItem
                   key={project.id ?? `${project.title ?? "project"}-${idx}`}>
-                  <article className="sl-newsletter-card">
+                  <article
+                    className="sl-newsletter-card sl-card-clickable"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedProject(project)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedProject(project);
+                      }
+                    }}>
                     {project.image && (
                       <div className="sl-card-image">
                         <OptimizedImage
@@ -222,9 +246,7 @@ export default function ServiceLearning() {
                         <h4 className="sl-card-subtitle">{project.subtitle}</h4>
                       )}
 
-                      <p className="sl-card-desc">
-                        {project.description || ""}
-                      </p>
+                      <span className="sl-card-cta">View Details →</span>
                     </div>
                   </article>
                 </StaggerItem>
@@ -256,6 +278,42 @@ export default function ServiceLearning() {
           </div>
         )}
       </main>
+
+      {/* Project Details Popup */}
+      {selectedProject && (
+        <div
+          className="modal open"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sl-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedProject(null);
+            }
+          }}>
+          <div className="modal-content sl-project-modal">
+            <button
+              type="button"
+              className="close-btn"
+              aria-label="Close project details"
+              onClick={() => setSelectedProject(null)}>
+              &times;
+            </button>
+
+            <h2 id="sl-modal-title">
+              {selectedProject.title || "Untitled project"}
+            </h2>
+
+            {selectedProject.subtitle && (
+              <p className="sl-modal-subtitle">{selectedProject.subtitle}</p>
+            )}
+
+            <p className="sl-modal-desc">
+              {selectedProject.description || "No description provided."}
+            </p>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

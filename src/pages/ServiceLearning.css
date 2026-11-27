@@ -118,3 +118,49 @@
 
 /* Pagination (shared .pagination from index.css) */
 .sl-container .pagination { margin-bottom: 4rem; }
+
+
+.sl-card-clickable {
+  cursor: pointer;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.sl-card-clickable:hover,
+.sl-card-clickable:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+}
+
+.sl-card-cta {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-blue, #0077cc);
+}
+
+.sl-project-modal {
+  max-width: 620px;
+  text-align: left;
+  color: var(--text-body, #222);
+}
+
+.sl-project-modal h2 {
+  margin: 0 28px 8px 0;
+  font-size: 1.4rem;
+  color: var(--text-heading, #111);
+}
+
+.sl-modal-subtitle {
+  margin: 0 0 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted, #555);
+}
+
+.sl-modal-desc {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--text-body, #333);
+}
