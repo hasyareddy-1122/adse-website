@@ -4,7 +4,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { getApiUrl } from "../lib/api";
+import { apiRequest, getApiUrl } from "../lib/api";
 import "./FacultyDetail.css";
 
 const CARD_EASE = [0.22, 1, 0.36, 1];
@@ -33,14 +33,23 @@ export default function FacultyDetail() {
       }
 
       try {
-        const response = await fetch(getApiUrl(`/api/faculties/${id}`), {
-          cache: "no-store",
-        });
-
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload?.error || "Unable to load faculty details.");
+        let payload;
+        try {
+          payload = await apiRequest(`/api/faculties/${id}`);
+        } catch (err) {
+          if (err?.status === 401) {
+            const fallbackRes = await fetch(getApiUrl(`/api/faculties/${id}`), {
+              cache: "no-store",
+            });
+            payload = await fallbackRes.json();
+            if (!fallbackRes.ok) {
+              throw new Error(
+                payload?.error || "Unable to load faculty details.",
+              );
+            }
+          } else {
+            throw err;
+          }
         }
 
         if (!cancelled) {
@@ -137,9 +146,30 @@ export default function FacultyDetail() {
                 </p>
               )}
 
-              {faculty.cabinLocation && (
+              {(faculty.cabinLocation || faculty.locationRestricted) && (
                 <p>
-                  <strong>Cabin Location:</strong> {faculty.cabinLocation}
+                  <strong>Campus / Cabin Location:</strong>{" "}
+                  {faculty.cabinLocation || "Kengeri Campus"}
+                  {faculty.locationRestricted && (
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: "0.9rem",
+                        color: "#555",
+                        marginTop: "4px",
+                      }}>
+                      <Link
+                        to="/login"
+                        style={{
+                          textDecoration: "underline",
+                          fontWeight: 600,
+                        }}>
+                        Sign in
+                      </Link>{" "}
+                      with your university account to view exact cabin / room
+                      details.
+                    </span>
+                  )}
                 </p>
               )}
 

@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import prisma from '../db.js';
-import { requireMinRole, requireRole } from '../auth.js';
+import { authenticate, requireMinRole, requireRole } from '../auth.js';
 
 const router = Router();
 const DEFAULT_DEPARTMENT = 'AI, ML AND DATA SCIENCE';
 const PROFILE_FIELDS = [
   'name', 'department', 'specialization', 'designation', 'qualification',
-  'bio', 'image', 'publicEmail', 'researchGate', 'googleScholar', 'orcid', 'website','cabinLocation',
+  'bio', 'image', 'publicEmail', 'researchGate', 'googleScholar', 'orcid', 'website', 'cabinLocation',
 ];
 const FACULTY_EDITABLE_FIELDS = [
   'name', 'specialization', 'designation', 'qualification', 'bio', 'image',
-  'publicEmail', 'researchGate', 'googleScholar', 'orcid', 'website','cabinLocation',
+  'publicEmail', 'researchGate', 'googleScholar', 'orcid', 'website', 'cabinLocation',
 ];
 
 function cleanText(value, maxLength = 5000) {
@@ -30,7 +30,22 @@ function pickFields(body, fields) {
   return data;
 }
 
-function publicFaculty(f) {
+function extractCampusBlockOnly(cabinLocation) {
+  if (!cabinLocation) return null;
+  const parts = String(cabinLocation)
+    .split(/\s*(?:·|\||,|–|-)\s*/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  return parts.length > 1 ? parts[0] : null;
+}
+
+function publicFaculty(f, viewer = null) {
+  const canViewFullLocation = Boolean(viewer);
+  const fullLocation = f.cabinLocation || null;
+  const visibleLocation = canViewFullLocation
+    ? fullLocation
+    : extractCampusBlockOnly(fullLocation);
+
   return {
     id: f.id,
     name: f.name,
@@ -45,7 +60,8 @@ function publicFaculty(f) {
     googleScholar: f.googleScholar,
     orcid: f.orcid,
     website: f.website,
-    cabinLocation: f.cabinLocation,
+    cabinLocation: visibleLocation,
+    locationRestricted: Boolean(fullLocation) && !canViewFullLocation,
     hasAccount: Boolean(f.userId),
   };
 }
@@ -62,9 +78,8 @@ async function ensureOwnProfile(user) {
   });
 }
 
-// GET /api/faculties — public directory. An empty database returns an empty list;
-// the frontend should not mistake an empty live response for an API failure.
-router.get('/', async (req, res, next) => {
+// GET /api/faculties — public directory (cabin details require login).
+router.get('/', authenticate, async (req, res, next) => {
   try {
     const { search, specialization } = req.query;
     const where = {};
@@ -78,7 +93,7 @@ router.get('/', async (req, res, next) => {
       ];
     }
     const faculties = await prisma.facultyProfile.findMany({ where, orderBy: { name: 'asc' } });
-    res.json({ faculties: faculties.map(publicFaculty) });
+    res.json({ faculties: faculties.map((f) => publicFaculty(f, req.user)) });
   } catch (err) {
     next(err);
   }
@@ -100,14 +115,13 @@ router.get('/specializations', async (_req, res, next) => {
 router.get('/me', requireRole('FACULTY'), async (req, res, next) => {
   try {
     const faculty = await ensureOwnProfile(req.user);
-    res.json({ faculty: publicFaculty(faculty) });
+    res.json({ faculty: publicFaculty(faculty, req.user) });
   } catch (err) {
     next(err);
   }
 });
 
 // PUT /api/faculties/me — FACULTY can edit their own public profile fields only.
-// Department, account link, and role remain controlled by ADMIN/HOD or SUPER_ADMIN.
 router.put('/me', requireRole('FACULTY'), async (req, res, next) => {
   try {
     const body = req.body || {};
@@ -122,20 +136,20 @@ router.put('/me', requireRole('FACULTY'), async (req, res, next) => {
       }
       return tx.facultyProfile.update({ where: { id: faculty.id }, data });
     });
-    res.json({ faculty: publicFaculty(updated) });
+    res.json({ faculty: publicFaculty(updated, req.user) });
   } catch (err) {
     next(err);
   }
 });
 
-// GET /api/faculties/:id — public detail page.
-router.get('/:id', async (req, res, next) => {
+// GET /api/faculties/:id — detail page (cabin details require login).
+router.get('/:id', authenticate, async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: 'Invalid faculty id' });
     const faculty = await prisma.facultyProfile.findUnique({ where: { id } });
     if (!faculty) return res.status(404).json({ error: 'Faculty not found' });
-    res.json({ faculty: publicFaculty(faculty) });
+    res.json({ faculty: publicFaculty(faculty, req.user) });
   } catch (err) {
     next(err);
   }
@@ -153,7 +167,7 @@ router.post('/', requireMinRole('ADMIN'), async (req, res, next) => {
       if (!Number.isInteger(data.userId) || data.userId < 1) return res.status(400).json({ error: 'Invalid userId' });
     }
     const faculty = await prisma.facultyProfile.create({ data });
-    res.status(201).json({ faculty: publicFaculty(faculty) });
+    res.status(201).json({ faculty: publicFaculty(faculty, req.user) });
   } catch (err) {
     if (err.code === 'P2002') return res.status(409).json({ error: 'That user already has a faculty profile' });
     next(err);
@@ -176,7 +190,7 @@ router.put('/:id', requireMinRole('ADMIN'), async (req, res, next) => {
       }
     }
     const faculty = await prisma.facultyProfile.update({ where: { id }, data });
-    res.json({ faculty: publicFaculty(faculty) });
+    res.json({ faculty: publicFaculty(faculty, req.user) });
   } catch (err) {
     if (err.code === 'P2025') return res.status(404).json({ error: 'Faculty not found' });
     if (err.code === 'P2002') return res.status(409).json({ error: 'That user already has a faculty profile' });
