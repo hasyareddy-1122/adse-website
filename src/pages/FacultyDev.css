@@ -4,7 +4,16 @@
 .fda-page { font-family: var(--font-body); background: var(--bg-off-white); color: var(--text-body); line-height: 1.6; }
 
 /* Hero */
-.fda-hero { background: image-set(url("/assets/abstract.avif") type("image/avif"), url("/assets/abstract.jpg") type("image/jpeg")) center/cover no-repeat; height: 65vh; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-on-dark); position: relative; }
+.fda-hero {
+  background: url("/assets/abstract.jpg") center/cover no-repeat;
+  height: 65vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-on-dark);
+  position: relative;
+}
 .fda-hero::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
 .fda-hero-content { position: relative; z-index: 1; max-width: 800px; padding: 0 var(--pad-x-mobile); }
 .fda-hero-content h1 { font-size: 52px; margin-bottom: 20px; letter-spacing: 1.5px; }

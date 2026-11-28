@@ -1112,7 +1112,7 @@ export default function Home() {
             <div
               className="card-header"
               style={{
-                backgroundImage: "url('/assets/college5.avif')",
+                backgroundImage: "url('/assets/college5.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
@@ -1140,7 +1140,7 @@ export default function Home() {
             <div
               className="card-header"
               style={{
-                backgroundImage: "url('/assets/postgrad.avif')",
+                backgroundImage: "url('/assets/postgrad.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
@@ -1167,7 +1167,7 @@ export default function Home() {
             <div
               className="card-header"
               style={{
-                backgroundImage: "url('/assets/phd.avif')",
+                backgroundImage: "url('/assets/phd.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
@@ -1192,7 +1192,7 @@ export default function Home() {
             <div
               className="card-header"
               style={{
-                backgroundImage: "url('/assets/onlinedeg.avif')",
+                backgroundImage: "url('/assets/onlinedeg.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",

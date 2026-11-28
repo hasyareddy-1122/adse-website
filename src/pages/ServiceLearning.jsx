@@ -12,11 +12,8 @@ import "./ServiceLearning.css";
 import { getApiUrl } from "../lib/api.js";
 
 import serviceBannerImg from "../assets/servicebanner.jpg";
-import serviceBannerImgAvif from "../assets/servicebanner.avif";
 import serviceBanner1Img from "../assets/servicebanner1.jpg";
-import serviceBanner1ImgAvif from "../assets/servicebanner1.avif";
 import serviceBanner2Img from "../assets/servicebanner2.jpg";
-import serviceBanner2ImgAvif from "../assets/servicebanner2.avif";
 
 const HERO_EASE = [0.22, 1, 0.36, 1];
 

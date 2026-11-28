@@ -12,7 +12,7 @@
 
 .fd-hero-section {
   position: relative;
-  background: image-set(url("/assets/denery-banner1.avif") type("image/avif"), url("/assets/denery-banner1.jpg") type("image/jpeg")) center/cover no-repeat;
+  background: url("/assets/denery-banner1.jpg") center/cover no-repeat;
   height: 280px;
   display: flex;
   align-items: center;

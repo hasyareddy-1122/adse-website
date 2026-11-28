@@ -1450,7 +1450,7 @@ function ServiceLearningProjectsSection({
             <input
               id="sl-form-image"
               type="text"
-              placeholder="/images/service-learning/sl-media-02.avif or https://..."
+              placeholder="/images/service-learning/sl-media-02.jpg or https://..."
               value={form.image}
               onChange={(e) => setForm({ ...form, image: e.target.value })}
             />

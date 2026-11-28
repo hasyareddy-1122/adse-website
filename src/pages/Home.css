@@ -4,7 +4,7 @@
 
 /* Hero */
 .hero-section {
-  background: image-set(url("/assets/sinoer.avif") type("image/avif"), url("/assets/sinoer.webp") type("image/webp")) 40% center/cover no-repeat;
+  background: url("/assets/sinoer.webp") 40% center/cover no-repeat;
   height: 680px;
   display: flex;
   align-items: center;
@@ -341,8 +341,7 @@
   justify-content: center;
   align-items: center;
   padding: 60px var(--pad-x-mobile);
-  background-image: image-set(url("/assets/denery-banner1.avif") type("image/avif"),
-      url("/assets/denery-banner1.jpg") type("image/jpeg"));
+  background-image: url("/assets/denery-banner1.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

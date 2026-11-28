@@ -4,7 +4,16 @@
 .iv-page { font-family: var(--font-body); background: var(--bg-off-white); color: var(--text-body); }
 
 /* Hero Section */
-.iv-hero { background: image-set(url("/assets/Infosys_Mysore.avif") type("image/avif"), url("/assets/Infosys_Mysore.jpg") type("image/jpeg")) center/cover no-repeat; height: 70vh; display: flex; align-items: center; justify-content: center; color: var(--text-on-dark); text-align: center; position: relative; }
+.iv-hero {
+  background: url("/assets/Infosys_Mysore.jpg") center/cover no-repeat;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-dark);
+  text-align: center;
+  position: relative;
+}
 .iv-hero::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
 .iv-hero-content { position: relative; z-index: 1; max-width: 800px; padding: 0 var(--pad-x-mobile); }
 .iv-hero-content h1 { font-size: 60px; margin-bottom: 20px; letter-spacing: 2px; }

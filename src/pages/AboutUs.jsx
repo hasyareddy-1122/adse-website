@@ -11,23 +11,14 @@ import {
 import "./AboutUs.css";
 
 import kuriakoseImg from "../assets/kuriakose_chavara.png";
-import kuriakoseImgAvif from "../assets/kuriakose_chavara.avif";
 import cmiImg from "../assets/cmi.jpg";
-import cmiImgAvif from "../assets/cmi.avif";
 import chclgImg from "../assets/chclg.png";
-import chclgImgAvif from "../assets/chclg.avif";
 import studentsStudyingImg from "../assets/students_studying.png";
-import studentsStudyingImgAvif from "../assets/students_studying.avif";
 import deanSpeakingImg from "../assets/dean_speaking.png";
-import deanSpeakingImgAvif from "../assets/dean_speaking.avif";
 import studentsGroupImg from "../assets/students_group.png";
-import studentsGroupImgAvif from "../assets/students_group.avif";
 import departmentImg from "../assets/department.png";
-import departmentImgAvif from "../assets/department.avif";
 import treeImgAsset from "../assets/tree.png";
-import treeImgAssetAvif from "../assets/tree.avif";
 import deerImgAsset from "../assets/deer.png";
-import deerImgAssetAvif from "../assets/deer.avif";
 
 const HERO_EASE = [0.22, 1, 0.36, 1];
 
@@ -36,7 +27,6 @@ const HISTORY_ITEMS = [
     year: "1831",
     highlight: true,
     dataImg: kuriakoseImg,
-    avifImg: kuriakoseImgAvif,
     description: (
       <>
         St Kuriakose Elias Chavara founded the
@@ -59,7 +49,6 @@ const HISTORY_ITEMS = [
   {
     year: "1998",
     dataImg: cmiImg,
-    avifImg: cmiImgAvif,
     isCmi: true,
     description: (
       <>
@@ -72,7 +61,6 @@ const HISTORY_ITEMS = [
   {
     year: "2004",
     dataImg: chclgImg,
-    avifImg: chclgImgAvif,
     isChclg: true,
     description: (
       <>
@@ -155,7 +143,6 @@ export default function AboutUs() {
   const deerImgRef = useRef(null);
 
   const [currentImgSrc, setCurrentImgSrc] = useState(kuriakoseImg);
-  const [currentAvifSrc, setCurrentAvifSrc] = useState(kuriakoseImgAvif);
   const [imgVariantClass, setImgVariantClass] = useState("");
   const [showTree, setShowTree] = useState(false);
   const [showDeer, setShowDeer] = useState(false);
@@ -211,7 +198,6 @@ export default function AboutUs() {
 
         if (activeItem.dataImg) {
           setCurrentImgSrc(activeItem.dataImg);
-          setCurrentAvifSrc(activeItem.avifImg ?? "");
           setImgVariantClass(
             activeItem.isCmi ? " cmi" : activeItem.isChclg ? " chclg" : "",
           );
@@ -266,13 +252,11 @@ export default function AboutUs() {
           className="about-img top-left"
           src={kuriakoseImg}
           alt="St. Kuriakose"
-          avifSrc={kuriakoseImgAvif}
         />
         <OptimizedImage
           className="about-img top-center"
           src={studentsStudyingImg}
           alt="Students reading"
-          avifSrc={studentsStudyingImgAvif}
         />
         <div className="vision-box-abs about-anim-card">
           <h2>VISION</h2>
@@ -293,7 +277,6 @@ export default function AboutUs() {
           className="about-img mid-right"
           src={deanSpeakingImg}
           alt="Speaker at podium"
-          avifSrc={deanSpeakingImgAvif}
         />
         <div className="mission-box-abs about-anim-card">
           <h2>MISSION</h2>
@@ -307,13 +290,11 @@ export default function AboutUs() {
           className="about-img bottom-center"
           src={studentsGroupImg}
           alt="Students working"
-          avifSrc={studentsGroupImgAvif}
         />
         <OptimizedImage
           className="about-img bottom-right"
           src={departmentImg}
           alt="Smiling students"
-          avifSrc={departmentImgAvif}
         />
       </section>
 
@@ -324,7 +305,6 @@ export default function AboutUs() {
           <div className="history-image">
             <OptimizedImage
               src={currentImgSrc}
-              avifSrc={currentAvifSrc || undefined}
               className={`default-img active${imgVariantClass}`}
               alt="History step"
               ref={defaultImgRef}
@@ -335,7 +315,6 @@ export default function AboutUs() {
               className={`special-img tree${showTree ? " show" : ""}`}
               alt="Tree"
               ref={treeImgRef}
-              avifSrc={treeImgAssetAvif}
             />
 
             <OptimizedImage
@@ -343,7 +322,6 @@ export default function AboutUs() {
               className={`special-img deer${showDeer ? " show" : ""}`}
               alt="Deer"
               ref={deerImgRef}
-              avifSrc={deerImgAssetAvif}
             />
           </div>
 
@@ -392,11 +370,7 @@ export default function AboutUs() {
             </p>
           </div>
           <div className="dept-img">
-            <OptimizedImage
-              src={departmentImg}
-              alt="Department Photo"
-              avifSrc={departmentImgAvif}
-            />
+            <OptimizedImage src={departmentImg} alt="Department Photo" />
           </div>
         </ScrollReveal>
       </section>
@@ -553,11 +527,7 @@ export default function AboutUs() {
       <section className="dean-section">
         <ScrollReveal className="dean-container">
           <div className="dean-card">
-            <OptimizedImage
-              src={deanSpeakingImg}
-              alt="Dr. Raghunandan Kumar"
-              avifSrc={deanSpeakingImgAvif}
-            />
+            <OptimizedImage src={deanSpeakingImg} alt="Dr. Raghunandan Kumar" />
             <div className="dean-name">
               <h3>
                 DR. RAGHUNANDAN KUMAR
