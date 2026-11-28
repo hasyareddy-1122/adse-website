@@ -1117,6 +1117,14 @@ export default function Home() {
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
               }}>
+              <div
+                className="card-header"
+                style={{
+                  backgroundImage: "url('/assets/onlinedeg.jpg')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}></div>
               <OptimizedImage
                 src="/assets/und-logo.webp"
                 alt="Undergraduate Logo"
