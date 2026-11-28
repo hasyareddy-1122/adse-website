@@ -14,16 +14,45 @@ import "./Home.css";
 
 const HERO_EASE = [0.22, 1, 0.36, 1];
 
+const DEFAULT_DEPARTMENT_ACTIVITIES = [
+  { id: "act-1", title: "Department Activities", link: "/caads" },
+  {
+    id: "act-2",
+    title: "Faculty Development Activities",
+    link: "/faculty-dev",
+  },
+  {
+    id: "act-3",
+    title: "Seminar / Talks / Training Programs",
+    link: "/department-events",
+  },
+  { id: "act-4", title: "Student Development Programme", link: "/caads" },
+  { id: "act-5", title: "Industrial Visit", link: "/industrial-visit" },
+  { id: "act-6", title: "Memorandum of Understanding (MoU)", link: "/about" },
+  {
+    id: "act-7",
+    title: "Extension & Service Learning Activity",
+    link: "/service-learning",
+  },
+  {
+    id: "act-8",
+    title: "Student Publications & Research",
+    link: "/newsletter",
+  },
+  { id: "act-9", title: "Curriculum Feedback Analysis", link: "/about" },
+  { id: "act-10", title: "Awards & Recognition", link: "/newsletter" },
+];
+
 export default function Home() {
-  // ── About popup ──
   const [aboutOpen, setAboutOpen] = useState(false);
   const [hodOpen, setHodOpen] = useState(false);
   const [programOpen, setProgramOpen] = useState(null);
 
-  // ── Faculty & Department Data ──
   const [facultyData, setFacultyData] = useState([]);
   const [departmentEvents, setDepartmentEvents] = useState([]);
-  const [departmentActivities, setDepartmentActivities] = useState([]);
+  const [departmentActivities, setDepartmentActivities] = useState(
+    DEFAULT_DEPARTMENT_ACTIVITIES,
+  );
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,7 +95,6 @@ export default function Home() {
     };
   }, []);
 
-  // Load Department Activities from /api/content
   useEffect(() => {
     let cancelled = false;
 
@@ -83,8 +111,8 @@ export default function Home() {
         const payload = await res.json();
         const activities = payload?.content?.["department.activities"];
 
-        if (!cancelled) {
-          setDepartmentActivities(Array.isArray(activities) ? activities : []);
+        if (!cancelled && Array.isArray(activities) && activities.length > 0) {
+          setDepartmentActivities(activities);
         }
       } catch (err) {
         console.error("Failed to load Department Activities:", err);
@@ -98,7 +126,6 @@ export default function Home() {
     };
   }, []);
 
-  // Load Published Events (prioritizing featured & upcoming) from /api/events
   useEffect(() => {
     let cancelled = false;
 
@@ -173,7 +200,6 @@ export default function Home() {
     currentPage * perPage,
   );
 
-  // Close popup on outside click
   useEffect(() => {
     function handleClick(e) {
       if (e.target.classList.contains("modal")) {
@@ -206,12 +232,13 @@ export default function Home() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: HERO_EASE }}>
-              <h1>Empowering Learning through AIML and Data Science</h1>
+              <h1>Department of AI and Data Science Engineering</h1>
               <p>
-                Our AIML and Data Science departments offer cutting-edge
-                programs designed to equip students with the skills needed for
-                the future. Experience hands-on learning, innovative projects,
-                and a supportive community that fosters growth and success.
+                School of Engineering and Technology · Bangalore Kengeri Campus.
+                Equipping students with strong theoretical foundations and
+                practical expertise in Artificial Intelligence, Machine
+                Learning, Deep Learning, Natural Language Processing, Computer
+                Vision, and Big Data Analytics.
               </p>
             </motion.div>
             <motion.div
@@ -222,8 +249,8 @@ export default function Home() {
               <button
                 type="button"
                 className="btn btn-filled"
-                onClick={() => scrollToSection("mission-vision")}>
-                Explore
+                onClick={() => scrollToSection("programs")}>
+                Programmes Offered
               </button>
 
               <button
@@ -237,7 +264,7 @@ export default function Home() {
                 type="button"
                 className="btn btn-outline"
                 onClick={() => scrollToSection("features")}>
-                Learn More
+                Key Highlights
               </button>
             </motion.div>
           </div>
@@ -259,10 +286,10 @@ export default function Home() {
                 AND COLLABORATION
               </h2>
               <p>
-                Our mission is to cultivate a dynamic learning environment that
-                fosters innovation in AI and Data Science. We envision a future
-                where our students lead in technological advancements and
-                data-driven solutions.
+                Dedicated to advancing cutting-edge technologies through ethical
+                research, high-performance computing labs, industry-aligned
+                curricula, and transformative collaborations at Bangalore
+                Kengeri Campus.
               </p>
             </div>
             <div className="mission-cards">
@@ -278,9 +305,10 @@ export default function Home() {
                 </div>
                 <h3>OUR MISSION</h3>
                 <p>
-                  CHRIST (Deemed to be University) is a nurturing ground for an
-                  individual's holistic development to make contribution to the
-                  society in a dynamic environment
+                  Empowering individuals to ethically harness data and AI,
+                  fostering a dynamic research environment for global
+                  well-being, and innovating scientific knowledge and
+                  entrepreneurship through academia-industry collaborations.
                 </p>
               </article>
               <article className="mission-card">
@@ -293,7 +321,11 @@ export default function Home() {
                   </svg>
                 </div>
                 <h3>OUR VISION</h3>
-                <p>Excellence and Service</p>
+                <p>
+                  To excel in human-centred AI and data-driven innovation
+                  through ethical research, societal well-being, and
+                  transformative collaborations.
+                </p>
               </article>
             </div>
           </div>
@@ -311,17 +343,15 @@ export default function Home() {
           <div className="about-left">
             <h2>About Department</h2>
             <p>
-              The Department offers three programmes BTech in AIML, BTech CSE
-              Specialization in Data Science, BTech in CSE Specialization in
-              AIML and MTech in Data Science. It focuses on equipping students
-              with strong theoretical foundations and practical skills in areas
-              such as Artificial Intelligence, Machine Learning, Deep Learning,
+              The Department offers BTech in Artificial Intelligence and Machine
+              Learning, BTech CSE Specialization in Data Science, BTech CSE
+              Specialization in Artificial Intelligence and Machine Learning,
+              and MTech in Data Science at Bangalore Kengeri Campus. It equips
+              students with strong theoretical foundations and practical skills
+              in Artificial Intelligence, Machine Learning, Deep Learning,
               Natural Language Processing, Computer Vision, Data Analytics, and
-              Intelligent Systems. The curriculum is designed to meet industry
-              demands and foster innovation, creativity, and critical thinking.
-              With experienced faculty, modern laboratories, and industry
-              collaborations, the department offers a rich learning environment
-              for research and development. Students are <br />
+              Intelligent Systems, while promoting ethical AI practices,
+              internships, real-time projects, and hackathons. <br />
               <a
                 href="#"
                 id="readMoreBtn"
@@ -347,15 +377,17 @@ export default function Home() {
               <ul>
                 <li>
                   <strong>M1:</strong> Empowering individuals to ethically
-                  harness data and AI.
+                  harness data and AI through accessible and value-driven
+                  curriculum.
                 </li>
                 <li>
                   <strong>M2:</strong> Foster a dynamic research environment
-                  with global impact.
+                  that advances innovative and impactful solutions for the
+                  betterment of global well-being.
                 </li>
                 <li>
-                  <strong>M3:</strong> Innovate knowledge and Entrepreneurship
-                  through collaborations.
+                  <strong>M3:</strong> Innovate scientific knowledge and
+                  Entrepreneurship through academia and Industry collaborations.
                 </li>
               </ul>
             </div>
@@ -366,11 +398,14 @@ export default function Home() {
         <ScrollReveal className="hod-section" delay={0.1}>
           <div className="hod-container">
             <div className="hod-image">
-              <OptimizedImage src="/assets/hod-image.webp" alt="HOD" />
+              <OptimizedImage
+                src="/assets/hod-image.webp"
+                alt="Dr. Michael Moses T - HOD"
+              />
               <h3>Dr. Michael Moses T</h3>
               <p>
-                <a href="mailto:hod.aiml@christuniversity.in">
-                  hod.aiml@christuniversity.in
+                <a href="mailto:hod.adse@christuniversity.in">
+                  hod.adse@christuniversity.in
                 </a>
               </p>
             </div>
@@ -382,15 +417,12 @@ export default function Home() {
                 We are at the vanguard of a technological revolution in which
                 data-driven solutions and intelligent systems are reshaping
                 every industry. At CHRIST (Deemed to be University), the
-                Department of AIML &amp; DS is dedicated to fostering the next
-                wave of researchers, innovators and moral AI experts who can
-                develop significant answers to pressing problems. Academic
-                rigour and experiential learning are integrated in our
-                department. Our students participate in project-based learning,
-                research, industry collaboration and internships as part of a
-                comprehensive curriculum that is tailored to stay up with global
-                advancements. We place a strong emphasis on holistic education,
-                whi...
+                Department of AI and Data Science Engineering is dedicated to
+                fostering the next wave of researchers, innovators and moral AI
+                experts who can develop significant answers to pressing
+                problems. Academic rigour and experiential learning are
+                integrated in our department through project-based learning,
+                research, industry collaboration and internships...
               </p>
               <a
                 href="#"
@@ -413,38 +445,65 @@ export default function Home() {
           <button className="close-btn" onClick={() => setAboutOpen(false)}>
             &times;
           </button>
-          <h2>About Department</h2>
+          <h2>About the Department of AI and Data Science Engineering</h2>
           <p>
-            The Department offers three programmes BTech in AIML, BTech CSE
-            Specialization in Data Science, BTech in CSE Specialization in AIML
-            and MTech in Data Science. It focuses on equipping students with
-            strong theoretical foundations and practical skills in areas such as
-            Artificial Intelligence, Machine Learning, Deep Learning, Natural
-            Language Processing, Computer Vision, Data Analytics, and
-            Intelligent Systems...
+            The Department offers BTech in Artificial Intelligence and Machine
+            Learning, BTech CSE Specialization in Data Science, BTech CSE
+            Specialization in Artificial Intelligence and Machine Learning and
+            MTech in Data Science at Bangalore Kengeri Campus. It focuses on
+            equipping students with strong theoretical foundations and practical
+            skills in areas such as Artificial Intelligence, Machine Learning,
+            Deep Learning, Natural Language Processing, Computer Vision, Data
+            Analytics, and Intelligent Systems.
+          </p>
+          <p>
+            The curriculum is designed to meet industry demands and foster
+            innovation, creativity, and critical thinking. With experienced
+            faculty, modern laboratories, and industry collaborations, the
+            department offers a rich learning environment for research and
+            development. Students are encouraged to participate in internships,
+            real-time projects and hackathons to gain hands-on experience, while
+            promoting ethical AI practices through societal impact awareness.
+          </p>
+          <p>
+            Graduates are well-prepared for careers in data science, AI
+            research, software development, and analytics across sectors
+            including healthcare, finance, education, robotics, and emerging
+            technologies. The department conducts workshops and industry
+            hands-on sessions regularly to equip students with the latest tools
+            in AI and data science.
           </p>
           <h3>Overview</h3>
           <p>
-            The Department of Artificial Intelligence (AI), Machine Learning
-            (ML) and Data Science (DS) is dedicated to advancing cutting-edge
-            technologies that are shaping the future.
+            The Department of AI and Data Science Engineering is dedicated to
+            advancing cutting-edge technologies that are shaping the future.
           </p>
-          <h3>Key Features:</h3>
+          <h3>Key Features</h3>
           <ul>
-            <li>High-performance computing labs with GPUs and cloud access.</li>
             <li>
-              Industry-aligned curriculum with Python, TensorFlow, PyTorch, R,
-              Spark.
+              High-performance computing labs with GPUs and access to cloud
+              platforms (AWS, Azure, Google Cloud) and data science tools.
             </li>
             <li>
-              Active research in Explainable AI, Generative Models, Ethical AI,
-              Data Science.
+              Best-in-class infrastructure and faculty profile with an
+              industry-aligned curriculum covering AI, ML, deep learning, NLP,
+              computer vision, and big data analytics using Python, TensorFlow,
+              PyTorch, R, and Spark.
             </li>
             <li>
-              Industry collaboration with CISCO, REDHAT, MongoDB, Festo, ORACLE
-              Academy.
+              Active research in explainable AI, generative models, ethical AI
+              and data science with faculty-student publications in reputed
+              journals and conferences.
             </li>
-            <li>Strong placement support and career counselling.</li>
+            <li>
+              Intense industry-academia interface with leading companies
+              including CISCO, Red Hat, MongoDB, Festo and Oracle Academy with
+              certifications in AIML/DS.
+            </li>
+            <li>
+              Strong placement records with dedicated support on
+              resume-building, interview prep and career counselling sessions.
+            </li>
           </ul>
         </div>
       </div>
@@ -459,19 +518,37 @@ export default function Home() {
           <p>
             We are at the vanguard of a technological revolution in which
             data-driven solutions and intelligent systems are reshaping every
-            industry. At CHRIST (Deemed to be University), the Department of
-            AIML &amp; DS is dedicated to fostering the next wave of
-            researchers, innovators and moral AI experts who can develop
-            significant answers to pressing problems. Academic rigour and
-            experiential learning are integrated in our department. Our students
-            participate in project-based learning, research, industry
-            collaboration and internships as part of a comprehensive curriculum
-            that is tailored to stay up with global advancements. We place a
-            strong emphasis on holistic education, societal impact,
-            interdisciplinary learning, and critical thinking. We take great
-            pride in the lively learning environment we foster, our committed
-            faculty and our active student body. As we expand, we aim to be a
-            centre for innovation and teaching in AI, ML, and DS.
+            industry. At CHRIST (Deemed to be University), the Department of AI
+            and Data Science Engineering is dedicated to fostering the next wave
+            of researchers, innovators and moral AI experts who can develop
+            significant answers to pressing problems.
+          </p>
+          <p>
+            Academic rigour and experiential learning are integrated in our
+            department. Our students participate in project-based learning,
+            research, industry collaboration and internships as part of a
+            comprehensive curriculum that is tailored to stay up with global
+            advancements. We place a strong emphasis on holistic education,
+            which promotes societal impact, interdisciplinary learning, and
+            critical thinking.
+          </p>
+          <p>
+            We take great pride in the lively learning environment we foster,
+            our committed faculty and our active student body. As we expand, we
+            want to establish ourselves as a centre for innovation and teaching
+            in the fields of artificial intelligence, machine learning and data
+            science. I encourage you to investigate the opportunities in our
+            department and work with us to create a future.
+          </p>
+          <p>
+            <strong>Dr. Michael Moses T</strong>
+            <br />
+            Head of Department, AI and Data Science Engineering
+            <br />
+            Email:{" "}
+            <a href="mailto:hod.adse@christuniversity.in">
+              hod.adse@christuniversity.in
+            </a>
           </p>
         </div>
       </div>
@@ -557,7 +634,26 @@ export default function Home() {
                 );
               })
             ) : (
-              <p>No department events have been announced.</p>
+              <div className="event">
+                <div className="event-date">
+                  Nov 30
+                  <br />
+                  <span>2026</span>
+                </div>
+                <div className="event-details">
+                  <p>
+                    <b>
+                      Guest Talk on &apos;Student to Entrepreneur: Leadership
+                      and Path to Building Startups&apos;
+                    </b>
+                    <br />
+                    Department of AI and Data Science Engineering seminar on
+                    entrepreneurship and startup leadership.
+                    <br />
+                    Date: 30 November 2026 | Venue: Bangalore Kengeri Campus
+                  </p>
+                </div>
+              </div>
             )}
 
             <Link to="/department-events" className="view-all">
@@ -631,42 +727,51 @@ export default function Home() {
       <section id="features" className="features-section">
         <div className="features-container">
           <ScrollReveal className="features-header">
-            <span className="features-label">Empower</span>
-            <h2>TRANSFORMING EDUCATION THROUGH INNOVATIVE SOLUTIONS</h2>
+            <span className="features-label">Department Highlights</span>
+            <h2>INFRASTRUCTURE, RESEARCH &amp; INDUSTRY COLLABORATION</h2>
             <p>
-              Our platform enhances the educational experience by integrating
-              essential features for seamless management. From curriculum
-              planning to performance evaluation, we provide the tools you need
-              to succeed.
+              High-performance GPU computing labs, cloud access (AWS, Azure,
+              Google Cloud), active research in Explainable &amp; Generative AI,
+              and industry certifications with CISCO, Red Hat, MongoDB, Festo,
+              and Oracle Academy.
             </p>
           </ScrollReveal>
           <StaggerGrid className="features-cards" stagger={0.09}>
             <StaggerItem className="feature-card">
               <OptimizedImage
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/c2287c794fdf39706a06fbf3d717c89a937951d3?width=789"
-                alt="Curriculum Planning Interface"
+                alt="High-Performance GPU Labs & Cloud Platforms"
               />
-              <h3>Streamlined Curriculum Planning for Educators</h3>
+              <h3>GPU Computing Labs &amp; Cloud Ecosystem</h3>
               <p>
-                Easily design and manage your curriculum with our intuitive
-                tools.
+                High-performance computing laboratories equipped with GPUs and
+                access to AWS, Azure, Google Cloud, Python, TensorFlow, PyTorch,
+                R, and Spark.
               </p>
             </StaggerItem>
             <StaggerItem className="feature-card">
               <OptimizedImage
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/abeb390e5bcb3ae9ea9bd19c90ff58ea9a03b748?width=789"
-                alt="Resource Management Dashboard"
+                alt="Industry Certifications & Collaborations"
               />
-              <h3>Efficient Resource Management Made Simple</h3>
-              <p>Optimize your resources to enhance learning outcomes.</p>
+              <h3>Industry Interface &amp; Global Certifications</h3>
+              <p>
+                Intense academia-industry collaboration with CISCO, Red Hat,
+                MongoDB, Festo, and Oracle Academy offering AIML and Data
+                Science certifications.
+              </p>
             </StaggerItem>
             <StaggerItem className="feature-card">
               <OptimizedImage
                 src="/assets/denery-banner1.jpg"
-                alt="Group Discussion"
+                alt="Research & Placement Excellence"
               />
-              <h3>Comprehensive Performance Evaluation Tools</h3>
-              <p>Track and assess student performance effortlessly.</p>
+              <h3>Explainable AI Research &amp; Placements</h3>
+              <p>
+                Scopus-indexed faculty-student research in Explainable AI,
+                Generative Models, and Ethical AI backed by strong placements
+                and career mentorship.
+              </p>
             </StaggerItem>
           </StaggerGrid>
         </div>
@@ -693,8 +798,9 @@ export default function Home() {
             <div className="card-body">
               <h3>Undergraduate</h3>
               <p>
-                Build a strong foundation with our undergraduate programs
-                designed for future leaders.
+                Comprehensive 4-year BTech programmes in AI &amp; ML and CSE
+                specialisations in Data Science &amp; AIML (with Lateral Entry
+                options) at Bangalore Kengeri Campus.
               </p>
               <button onClick={() => setProgramOpen("undergraduate")}>
                 More Info
@@ -720,7 +826,8 @@ export default function Home() {
             <div className="card-body">
               <h3>Postgraduate</h3>
               <p>
-                Advance your knowledge with specialized postgraduate degrees.
+                2-year MTech in Data Science focused on advanced theoretical
+                foundations, big data analytics, research, and specialization.
               </p>
               <button onClick={() => setProgramOpen("postgraduate")}>
                 More Info
@@ -745,7 +852,10 @@ export default function Home() {
             </div>
             <div className="card-body">
               <h3>PhD</h3>
-              <p>Pursue research and innovation with our doctoral programs.</p>
+              <p>
+                Doctoral research in Explainable AI, Generative Models, Computer
+                Vision, NLP, and Ethical Data Science.
+              </p>
               <button onClick={() => setProgramOpen("phd")}>More Info</button>
             </div>
           </StaggerItem>
@@ -761,13 +871,16 @@ export default function Home() {
               }}>
               <OptimizedImage
                 src="/assets/ondeg-logo.jpg"
-                alt="Online Degree Logo"
+                alt="Industry Certifications Logo"
                 className="profile-img"
               />
             </div>
             <div className="card-body">
-              <h3>Online Degree</h3>
-              <p>Learn anytime, anywhere with our flexible online programs.</p>
+              <h3>Certifications &amp; Exchange</h3>
+              <p>
+                Industry certifications (CISCO, Red Hat, MongoDB, Oracle
+                Academy), Honors/Minors, and international university exchange.
+              </p>
               <button onClick={() => setProgramOpen("online")}>
                 More Info
               </button>
@@ -792,81 +905,142 @@ export default function Home() {
 
             {programOpen === "undergraduate" && (
               <>
-                <h2>Undergraduate Programmes</h2>
+                <h2>Undergraduate Programmes (Bangalore Kengeri Campus)</h2>
                 <p>
-                  Build a strong foundation in computing, Artificial
-                  Intelligence and Data Science through undergraduate programmes
-                  offered by the department.
+                  Comprehensive 4-year (8-semester) undergraduate engineering
+                  programmes building strong theoretical foundations and
+                  hands-on industry expertise.
                 </p>
-                <h3>Programmes Offered</h3>
+
+                <h3>
+                  1. BTech in Artificial Intelligence and Machine Learning
+                </h3>
                 <ul>
                   <li>
-                    B.Tech in Artificial Intelligence and Machine Learning
+                    <strong>Focus Areas:</strong> Intelligent systems, neural
+                    networks, deep learning, natural language processing,
+                    computer vision, supervised/unsupervised learning, and
+                    real-world AI application design.
                   </li>
                   <li>
-                    B.Tech in Computer Science and Engineering – Data Science
+                    <strong>Selection Process:</strong> Entrance Test (ET – 90
+                    mins), Skill Assessment (SA), Micro Presentation (MP), and
+                    Personal Interview (PI).
                   </li>
-                  <li>B.Tech in Computer Science and Engineering – AIML</li>
                 </ul>
-                <h3>Learning Areas</h3>
-                <p>
-                  Programming, data structures, algorithms, artificial
-                  intelligence, machine learning, data analytics and practical
-                  project development.
-                </p>
+
+                <h3>
+                  2. BTech in Computer Science and Engineering (Artificial
+                  Intelligence and Machine Learning)
+                </h3>
+                <ul>
+                  <li>
+                    <strong>Tracks:</strong> Regular (4 Years) &amp; Lateral
+                    Entry (for 3-year Diploma holders).
+                  </li>
+                  <li>
+                    <strong>Core Pillars:</strong> Artificial Intelligence,
+                    Machine Learning, Computer Science fundamentals
+                    (programming, algorithms, databases, OS, software
+                    engineering), and Data Science.
+                  </li>
+                  <li>
+                    <strong>Career Outcomes:</strong> Machine Learning Engineer,
+                    AI Solutions Developer, Deep Learning Engineer, Predictive
+                    Analytics Specialist.
+                  </li>
+                </ul>
+
+                <h3>
+                  3. BTech in Computer Science and Engineering (Data Science)
+                </h3>
+                <ul>
+                  <li>
+                    <strong>Tracks:</strong> Regular (4 Years) &amp; Lateral
+                    Entry (for 3-year Diploma holders).
+                  </li>
+                  <li>
+                    <strong>Core Pillars:</strong> Data Science, Artificial
+                    Intelligence, Big Data Analytics (distributed systems, cloud
+                    platforms), and Computer Science fundamentals.
+                  </li>
+                  <li>
+                    <strong>Career Outcomes:</strong> Data Analyst, Business
+                    Intelligence (BI) Analyst, Big Data Engineer, Data Pipeline
+                    Engineer, Cloud Data Engineer, Data Architect.
+                  </li>
+                </ul>
               </>
             )}
 
             {programOpen === "postgraduate" && (
               <>
-                <h2>Postgraduate Programme</h2>
+                <h2>Postgraduate Programme (Bangalore Kengeri Campus)</h2>
                 <p>
-                  The postgraduate programme provides opportunities for advanced
-                  learning, technical specialization and research in Data
-                  Science.
+                  Postgraduate studies focused on advanced knowledge,
+                  research-driven specialization, and industry leadership in
+                  Data Science.
                 </p>
-                <h3>Programme Offered</h3>
-                <p> M.Tech in Data Science </p>
-                <h3>Learning Areas</h3>
-                <p>
-                  Advanced data analytics, machine learning, intelligent
-                  systems, research methodologies and applied projects.
-                </p>
+                <h3>MTech in Data Science (2 Years)</h3>
+                <ul>
+                  <li>
+                    <strong>Focus Areas:</strong> Advanced data analytics,
+                    machine learning, deep learning, big data engineering,
+                    intelligent systems, and applied research projects.
+                  </li>
+                  <li>
+                    <strong>Eligibility:</strong> BTech / BE / MSc in a relevant
+                    discipline with a minimum of 55% aggregate marks from a
+                    recognized university.
+                  </li>
+                </ul>
               </>
             )}
 
             {programOpen === "phd" && (
               <>
-                <h2>Doctoral Programme (PhD)</h2>
+                <h2>Doctoral Research &amp; Scholarly Engagements</h2>
                 <p>
-                  The doctoral programme encourages original research and
-                  innovation in Artificial Intelligence, Machine Learning and
-                  Data Science.
+                  The department fosters a dynamic research environment with
+                  active faculty-student publications in Scopus-indexed journals
+                  and international conferences.
                 </p>
-                <h3>Research Areas</h3>
+                <h3>Key Research Domains</h3>
                 <ul>
-                  <li>Artificial Intelligence and Machine Learning</li>
-                  <li>Data Science and Big Data Analytics</li>
-                  <li>Deep Learning and Intelligent Systems</li>
-                  <li>Emerging interdisciplinary research areas</li>
+                  <li>Explainable AI (XAI) and Ethical AI</li>
+                  <li>Generative Models and Deep Learning</li>
+                  <li>Natural Language Processing and Computer Vision</li>
+                  <li>Big Data Analytics and Intelligent Systems</li>
                 </ul>
               </>
             )}
 
             {programOpen === "online" && (
               <>
-                <h2>Online Degree Programmes</h2>
+                <h2>
+                  Industry Certifications, Honors &amp; Experiential Learning
+                </h2>
                 <p>
-                  Online learning provides flexible opportunities to develop
-                  knowledge and skills through digital learning resources and
-                  structured academic programmes.
+                  Students complement their core degree with industry-recognized
+                  certifications, interdisciplinary minors, and global exposure.
                 </p>
-                <h3>Learning Experience</h3>
+                <h3>Key Opportunities</h3>
                 <ul>
-                  <li>Flexible online learning</li>
-                  <li>Digital learning resources</li>
-                  <li>Self-paced learning opportunities</li>
-                  <li>Access to academic content online</li>
+                  <li>
+                    <strong>Industry Certifications:</strong> CISCO, Red Hat,
+                    MongoDB, Festo, and Oracle Academy certifications in AIML
+                    and Data Science.
+                  </li>
+                  <li>
+                    <strong>Experiential Learning:</strong> Mandatory
+                    internships, real-time industry projects, hackathons, and
+                    Service Learning initiatives.
+                  </li>
+                  <li>
+                    <strong>Global &amp; Interdisciplinary Exposure:</strong>{" "}
+                    Honors/Minors programmes and international university
+                    exchange opportunities.
+                  </li>
                 </ul>
               </>
             )}

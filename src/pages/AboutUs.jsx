@@ -3,7 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { ScrollReveal } from "../components/MotionPrimitives";
+import {
+  ScrollReveal,
+  StaggerGrid,
+  StaggerItem,
+} from "../components/MotionPrimitives";
 import "./AboutUs.css";
 
 import kuriakoseImg from "../assets/kuriakose_chavara.png";
@@ -94,6 +98,51 @@ const HISTORY_ITEMS = [
         under Section 3 of the UGC Act, 1956.
       </>
     ),
+  },
+];
+
+const FACULTY_ACHIEVEMENTS = [
+  {
+    name: "Dr. Michael Moses T",
+    badge: "Chief Minister's Commendation",
+    detail:
+      "Honoured with the Chief Minister's Commendation for leadership and contributions to engineering and AI education.",
+  },
+  {
+    name: "Dr. Mary Anita E. A.",
+    badge: "100 Scopus-Indexed Publications",
+    detail:
+      "Achieved the milestone of 100 Scopus-indexed research publications in computing, AI, and data science.",
+  },
+  {
+    name: "Recognized Research Faculty",
+    badge: "Scholarly Excellence",
+    detail:
+      "Distinguished research contributions and recognitions by Dr. Neethu P. S., Dr. Shiju George, Prof. Chaitra P C, Dr. Bijeesh T V, and Dr. Santhrupth B C.",
+  },
+];
+
+const ALUMNI_TESTIMONIALS = [
+  {
+    name: "Mishbah Pinto Chandy",
+    programme: "B.Tech CSE (Data Science) · Class of 2025",
+    placement: "Placed at Siemens Healthineers (Graduate Engineer Trainee)",
+    quote:
+      "My journey at Christ University has been one of growth, ambition, and aspiration. The years spent here shaped not only my academic foundation but also my perspective on pursuing excellence. Securing an opportunity with Siemens Healthineers marks the beginning of a meaningful chapter contributing to global healthcare breakthroughs.",
+  },
+  {
+    name: "Aldona Rose Maria",
+    programme: "B.Tech CSE (Artificial Intelligence & Machine Learning)",
+    placement: "Department of AI and Data Science Engineering Alumni",
+    quote:
+      "Hands-on GPU labs, industry-aligned coursework, and continuous mentorship from faculty prepared me to tackle real-world AI and machine learning challenges with confidence.",
+  },
+  {
+    name: "Sania Elizabath Manoj",
+    programme: "B.Tech CSE (Data Science)",
+    placement: "Department of AI and Data Science Engineering Alumni",
+    quote:
+      "Project-based learning, hackathons, and research opportunities at Kengeri Campus provided a strong launchpad for my career in data science and analytics.",
   },
 ];
 
@@ -230,7 +279,7 @@ export default function AboutUs() {
           <p>
             Christ (Deemed to be University), a premier educational institution,
             is an academic fraternity of individuals dedicated to the motto of
-            "EXCELLENCE AND SERVICE."
+            &quot;EXCELLENCE AND SERVICE.&quot;
           </p>
         </div>
         <motion.h1
@@ -250,8 +299,8 @@ export default function AboutUs() {
           <h2>MISSION</h2>
           <p>
             CHRIST (Deemed to be University) is a nurturing ground for an
-            individual's holistic development to make effective contribution to
-            the society in a dynamic environment.
+            individual&apos;s holistic development to make effective
+            contribution to the society in a dynamic environment.
           </p>
         </div>
         <OptimizedImage
@@ -272,7 +321,6 @@ export default function AboutUs() {
       <section className="history-section" ref={sectionRef}>
         <h1 className="history-title">History</h1>
         <div className="history-content">
-          {/* History Image */}
           <div className="history-image">
             <OptimizedImage
               src={currentImgSrc}
@@ -299,7 +347,6 @@ export default function AboutUs() {
             />
           </div>
 
-          {/* History Timeline */}
           <div className="timeline">
             <div
               className="timeline-line"
@@ -327,14 +374,21 @@ export default function AboutUs() {
       <section className="dept-section">
         <ScrollReveal className="dept-content">
           <div className="dept-text">
-            <h1>Our Department</h1>
+            <h1>Department of AI and Data Science Engineering</h1>
             <p>
-              Christ University's AIML &amp; Data Science department offers a
-              well-rounded, modern educational experience—from cutting-edge
-              curriculum and resources to active research, industry exposure,
-              and strong career prospects. It aligns well with the university's
-              emphasis on "Excellence and Service", though it demands discipline
-              with regard to academics and campus policies.
+              Located at the Bangalore Kengeri Campus under the School of
+              Engineering and Technology, the Department offers BTech in
+              Artificial Intelligence and Machine Learning, BTech CSE
+              Specialization in Data Science, BTech CSE Specialization in
+              Artificial Intelligence and Machine Learning, and MTech in Data
+              Science.
+            </p>
+            <p style={{ marginTop: "12px" }}>
+              Our vision is to excel in human-centred AI and data-driven
+              innovation through ethical research, societal well-being, and
+              transformative collaborations—supported by GPU computing labs,
+              AWS/Azure/Google Cloud access, and industry certifications from
+              CISCO, Red Hat, MongoDB, Festo, and Oracle Academy.
             </p>
           </div>
           <div className="dept-img">
@@ -345,6 +399,154 @@ export default function AboutUs() {
             />
           </div>
         </ScrollReveal>
+      </section>
+
+      {/* Scholarly Engagements & Faculty Achievements */}
+      <section
+        style={{
+          background: "#f8f9fb",
+          color: "#0f172a",
+          padding: "72px 8%",
+        }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <ScrollReveal>
+            <h2
+              style={{
+                fontSize: "2.2rem",
+                marginBottom: "10px",
+                textAlign: "center",
+              }}>
+              Scholarly Engagements &amp; Faculty Achievements
+            </h2>
+            <p
+              style={{
+                textAlign: "center",
+                color: "#5a6577",
+                maxWidth: "740px",
+                margin: "0 auto 40px",
+              }}>
+              Advancing research facilities, patents, industry collaborations,
+              best teaching practices, and Scopus-indexed publications.
+            </p>
+          </ScrollReveal>
+
+          <StaggerGrid
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
+              gap: "24px",
+            }}>
+            {FACULTY_ACHIEVEMENTS.map((item) => (
+              <StaggerItem
+                key={item.name}
+                style={{
+                  background: "#fff",
+                  padding: "26px",
+                  borderRadius: "18px",
+                  border: "1px solid rgba(15, 23, 42, 0.08)",
+                  boxShadow: "0 4px 16px rgba(15, 23, 42, 0.05)",
+                }}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    fontSize: "0.78rem",
+                    fontWeight: 600,
+                    padding: "4px 12px",
+                    borderRadius: "999px",
+                    background: "#002147",
+                    color: "#fff",
+                    marginBottom: "12px",
+                  }}>
+                  {item.badge}
+                </span>
+                <h3 style={{ fontSize: "1.25rem", marginBottom: "8px" }}>
+                  {item.name}
+                </h3>
+                <p style={{ color: "#475569", fontSize: "0.95rem" }}>
+                  {item.detail}
+                </p>
+              </StaggerItem>
+            ))}
+          </StaggerGrid>
+
+          {/* Student & Alumni Testimonials */}
+          <ScrollReveal>
+            <h2
+              style={{
+                fontSize: "2.1rem",
+                margin: "64px 0 10px",
+                textAlign: "center",
+              }}>
+              Student &amp; Alumni Testimonials
+            </h2>
+            <p
+              style={{
+                textAlign: "center",
+                color: "#5a6577",
+                maxWidth: "700px",
+                margin: "0 auto 36px",
+              }}>
+              Voices from our graduates leading innovation in global technology
+              and healthcare organizations.
+            </p>
+          </ScrollReveal>
+
+          <StaggerGrid
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: "24px",
+            }}>
+            {ALUMNI_TESTIMONIALS.map((t) => (
+              <StaggerItem
+                key={t.name}
+                style={{
+                  background: "#fff",
+                  padding: "28px",
+                  borderRadius: "18px",
+                  border: "1px solid rgba(15, 23, 42, 0.08)",
+                  boxShadow: "0 4px 16px rgba(15, 23, 42, 0.05)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}>
+                <p
+                  style={{
+                    color: "#334155",
+                    fontSize: "0.95rem",
+                    fontStyle: "italic",
+                    marginBottom: "18px",
+                  }}>
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div>
+                  <strong style={{ display: "block", fontSize: "1.05rem" }}>
+                    {t.name}
+                  </strong>
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: "0.85rem",
+                      color: "#0077cc",
+                      fontWeight: 600,
+                      marginTop: "2px",
+                    }}>
+                    {t.programme}
+                  </span>
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: "0.82rem",
+                      color: "#64748b",
+                      marginTop: "2px",
+                    }}>
+                    {t.placement}
+                  </span>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerGrid>
+        </div>
       </section>
 
       {/* Dean Section */}
@@ -404,24 +606,24 @@ export default function AboutUs() {
             (Deemed to be University). Established in 2009, SoET is a unique and
             fastest-growing school that equips students and scholars with the
             skills and competencies necessary to navigate the complexities of
-            today's dynamic world. The school offers a wide range of programmes
-            approved by the University Grants Commission (UGC) and All India
-            Council for Technical Education (AICTE) and accredited by the
-            National Assessment and Accreditation Council (NAAC) and National
-            Board for Accreditation (NBA) through a blend of project-based and
-            multidisciplinary curricula in emerging technologies including
-            Honors and Minors in AI&amp;ML, Psychology, CIMA, Management,
-            Geomatics, and Architecture.
+            today&apos;s dynamic world. The school offers a wide range of
+            programmes approved by the University Grants Commission (UGC) and
+            All India Council for Technical Education (AICTE) and accredited by
+            the National Assessment and Accreditation Council (NAAC) and
+            National Board for Accreditation (NBA) through a blend of
+            project-based and multidisciplinary curricula in emerging
+            technologies including Honors and Minors in AI&amp;ML, Psychology,
+            CIMA, Management, Geomatics, and Architecture.
           </p>
           <p>
             Spread across 78.5 acres, Kengeri Campus located off Mysore Road, is
             lush green with several amenities. The Mysore Horticulture Society,
             Lalbagh, Bangalore has awarded the Special Outstanding Prize of
-            'Best Ornamental Gardens' to Kengeri Campus. The vibrancy of the
-            campus is in its diversity among the students and faculty. Centres
-            such as the Centre of Excellence (COE) in E-Mobility, and Frontier
-            Materials, enable our researchers and scientists to be at the
-            forefront of cutting-edge research, actively bridging the gap
+            &apos;Best Ornamental Gardens&apos; to Kengeri Campus. The vibrancy
+            of the campus is in its diversity among the students and faculty.
+            Centres such as the Centre of Excellence (COE) in E-Mobility, and
+            Frontier Materials, enable our researchers and scientists to be at
+            the forefront of cutting-edge research, actively bridging the gap
             between innovation and education.
           </p>
           <p>
@@ -444,13 +646,13 @@ export default function AboutUs() {
             technology and many students find unparalleled opportunities for
             real-world experience before they enter the workforce. CHRIST
             strives to develop the citizens of tomorrow by nurturing the
-            individual's holistic development to make an effective contribution
-            to society in a dynamic environment, which drives us toward the
-            pursuit of excellence.
+            individual&apos;s holistic development to make an effective
+            contribution to society in a dynamic environment, which drives us
+            toward the pursuit of excellence.
           </p>
           <p>
             I invite you to be part of this unique transformative journey with
-            our motto of 'Excellence and Service'.
+            our motto of &apos;Excellence and Service&apos;.
           </p>
           <p>
             <strong>DR. RAGHUNANDAN KUMAR</strong>
