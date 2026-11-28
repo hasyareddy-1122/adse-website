@@ -20,7 +20,6 @@ const ALLOWED_IMAGE_MIME = new Set([
   'image/png',
   'image/jpeg',
   'image/webp',
-  'image/avif',
   'image/gif',
 ]);
 

@@ -901,13 +901,13 @@ function EventsManagementPanel({ onErr, flashFn }) {
 
           <div className="field">
             <label htmlFor="ev-image-file">
-              Upload Event Banner (PNG, JPEG, WEBP, AVIF · max 10 MB)
+              Upload Event Banner (PNG, JPEG, WEBP · max 10 MB)
             </label>
             <input
               ref={fileInputRef}
               id="ev-image-file"
               type="file"
-              accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
+              accept="image/png,image/jpeg,image/webp,image/gif"
               disabled={saving || uploadingImage}
               onChange={handleImageFileChange}
             />

@@ -148,11 +148,7 @@ export default function ServiceLearning() {
             </p>
           </div>
           <div className="sl-image">
-            <OptimizedImage
-              src={serviceBannerImg}
-              alt="Service Learning 1"
-              avifSrc={serviceBannerImgAvif}
-            />
+            <OptimizedImage src={serviceBannerImg} alt="Service Learning 1" />
           </div>
         </ScrollReveal>
 
@@ -165,11 +161,7 @@ export default function ServiceLearning() {
             </p>
           </div>
           <div className="sl-image">
-            <OptimizedImage
-              src={serviceBanner1Img}
-              alt="Service Learning 2"
-              avifSrc={serviceBanner1ImgAvif}
-            />
+            <OptimizedImage src={serviceBanner1Img} alt="Service Learning 2" />
           </div>
         </ScrollReveal>
 
@@ -182,11 +174,7 @@ export default function ServiceLearning() {
             </p>
           </div>
           <div className="sl-image">
-            <OptimizedImage
-              src={serviceBanner2Img}
-              alt="Service Learning 3"
-              avifSrc={serviceBanner2ImgAvif}
-            />
+            <OptimizedImage src={serviceBanner2Img} alt="Service Learning 3" />
           </div>
         </ScrollReveal>
       </section>
