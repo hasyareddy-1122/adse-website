@@ -11,7 +11,7 @@ import {
 import "./ServiceLearning.css";
 import { getApiUrl } from "../lib/api.js";
 
-import serviceBannerImg from "../assets/servicebanner.jpg";
+import serviceBannerImg from "../assets/servicebanner.png";
 import serviceBanner1Img from "../assets/servicebanner1.jpg";
 import serviceBanner2Img from "../assets/servicebanner2.jpg";
 
