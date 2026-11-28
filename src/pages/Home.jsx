@@ -1067,7 +1067,7 @@ export default function Home() {
           <StaggerGrid className="features-cards" stagger={0.09}>
             <StaggerItem className="feature-card">
               <OptimizedImage
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/c2287c794fdf39706a06fbf3d717c89a937951d3?width=789"
+                src="url('/assets/GPU-Labs.png')"
                 alt="High-Performance GPU Labs & Cloud Platforms"
               />
               <h3>GPU Computing Labs &amp; Cloud Ecosystem</h3>
@@ -1079,7 +1079,7 @@ export default function Home() {
             </StaggerItem>
             <StaggerItem className="feature-card">
               <OptimizedImage
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/abeb390e5bcb3ae9ea9bd19c90ff58ea9a03b748?width=789"
+                src="url('/assets/Table-discussion.png')"
                 alt="Industry Certifications & Collaborations"
               />
               <h3>Industry Interface &amp; Global Certifications</h3>
