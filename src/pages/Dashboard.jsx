@@ -2012,10 +2012,10 @@ function ContentEditor({ onErr, flashFn, userRole }) {
       userRole !== "SUPER_ADMIN" &&
       !key.startsWith("newsletter.") &&
       !key.startsWith("service-learning.") &&
-      !key.startsWith("department.activities")
+      !key.startsWith("department.")
     ) {
       setJsonError(
-        "Admins can create only newsletter.*, service-learning.*, and department.activities* keys.",
+        "Admins can create only newsletter.*, service-learning.*, and department.* keys.",
       );
       return;
     }
